@@ -21,7 +21,7 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
 @Deprecated("just don't use it")
 fun Any?.println() = println(this)
 
-fun test(part1: (List<String>) -> Long, part2: (List<String>) -> Long) {
+fun test(vararg parts: (List<String>) -> Long) {
     val className = Throwable().stackTrace[1].className
     check(className.startsWith("Day"))
     check(className.endsWith("Kt"))
@@ -32,9 +32,12 @@ fun test(part1: (List<String>) -> Long, part2: (List<String>) -> Long) {
     val testInput = readInput("${day}_test")
     val realInput = readInput(day)
 
-    for ((i, p) in listOf(part1, part2).withIndex()) {
+    for ((i, p) in parts.withIndex()) {
         for ((kind, input) in listOf(Pair("test", testInput), Pair("real", realInput))) {
-            println("part${i + 1}, $kind: ${p(input)}")
+            print("part${i + 1}, $kind: ")
+            runCatching { p(input) }
+                .onSuccess { println(it) }
+                .onFailure { it.printStackTrace(System.out) }
         }
     }
 }

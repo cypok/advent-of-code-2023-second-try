@@ -1,3 +1,4 @@
+import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
@@ -29,9 +30,15 @@ fun test(vararg parts: (List<String>) -> Long) {
         .first()
     val day = className.substringBefore("Kt")
 
+    val inputFiles =
+        File("src/").listFiles { _, name -> name.startsWith(day) && name.endsWith(".txt") } ?: arrayOf()
+
     for ((i, p) in parts.withIndex()) {
-        for ((kind, inputSuffix) in listOf(Pair("test", "_test"), Pair("real", ""))) {
-            runCatching { readInput("$day$inputSuffix") }
+        for (f in inputFiles.sortedBy { it.length() }) {
+            val kind = f.nameWithoutExtension
+                .substringAfter(day).substringAfter('_')
+                .takeIf { it.isNotEmpty() } ?: "real"
+            runCatching { f.toPath().readLines() }
                 .onSuccess { input ->
                     print("part${i + 1}, $kind: ")
                     val (result, time) = measureTimedValue { runCatching { p(input) } }

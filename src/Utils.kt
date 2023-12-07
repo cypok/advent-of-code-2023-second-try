@@ -17,6 +17,10 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
     .toString(16)
     .padStart(32, '0')
 
+// Inspired by Iterable.sumOf()
+inline fun <T> Iterable<T>.productOf(selector: (T) -> Long): Long =
+    fold(1) { acc, x -> acc * selector(x) }
+
 /**
  * The cleaner shorthand for printing output.
  */

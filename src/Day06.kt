@@ -1,11 +1,11 @@
 fun main() = test(::part1, ::part2)
 
 private fun process(races: List<Pair<Long, Long>>): Long {
-    return races.fold(1) { acc, (time, distance) ->
-        acc * (0 until time).count { hold ->
+    return races.productOf { (time, distance) ->
+        (0 until time).count { hold ->
             val speed = hold
             speed * (time - hold) > distance
-        }
+        }.toLong()
     }
 }
 

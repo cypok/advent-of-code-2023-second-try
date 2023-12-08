@@ -27,6 +27,8 @@ inline fun <T> Iterable<T>.productOf(selector: (T) -> Long): Long =
 @Deprecated("just don't use it")
 fun Any?.println() = println(this)
 
+private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part([12])(?:\b|_).*""")
+
 fun test(vararg parts: (List<String>) -> Long) {
     val className = Throwable().stackTrace
         .map { it.className }
@@ -39,12 +41,20 @@ fun test(vararg parts: (List<String>) -> Long) {
 
     for ((i, p) in parts.withIndex()) {
         for (f in inputFiles.sortedBy { it.length() }) {
+            val partNum = i + 1
             val kind = f.nameWithoutExtension
                 .substringAfter(day).substringAfter('_')
                 .takeIf { it.isNotEmpty() } ?: "real"
+
+            val partNumMatch = PART_NUM_PATTERN.matchEntire(kind)
+            if (partNumMatch != null && partNumMatch.groupValues[1].toInt() != partNum) {
+                // Skip inputs for other parts.
+                continue
+            }
+
             runCatching { f.toPath().readLines() }
                 .onSuccess { input ->
-                    print("part${i + 1}, $kind: ")
+                    print("part$partNum, $kind: ")
                     val (result, time) = measureTimedValue { runCatching { p(input) } }
                     print("${result.getOrElse { "ERROR" }} (took ${time.inWholeMilliseconds} ms)")
                     result

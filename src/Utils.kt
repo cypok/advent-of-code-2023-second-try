@@ -29,7 +29,7 @@ fun Any?.println() = println(this)
 
 private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part([12])(?:\b|_).*""")
 
-fun test(vararg parts: (List<String>) -> Long) {
+fun test(vararg parts: (List<String>) -> Any) {
     val className = Throwable().stackTrace
         .map { it.className }
         .dropWhile { !it.startsWith("Day") || !it.endsWith("Kt") }

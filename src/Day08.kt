@@ -13,7 +13,7 @@ private fun parse(input: List<String>): Pair<String, Map<String, Pair<String, St
     return Pair(
         input[0],
         input.asSequence().drop(2).map { line ->
-            val (_, src, left, right) = NODE_REGEX.matchEntire(line)!!.groupValues
+            val (src, left, right) = NODE_REGEX.matchEntire(line)!!.destructured
             src to Pair(left, right)
         }.toMap()
     )

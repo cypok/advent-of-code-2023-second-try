@@ -40,5 +40,5 @@ private fun rangeBetween(x: Int, y: Int): IntRange {
 }
 
 private fun countDistance(p1: Int, p2: Int, emptyLines: Set<Int>, expansion: Int): Int {
-    return rangeBetween(p1, p2).sumOf { if (emptyLines.contains(it)) expansion else 1 }
+    return rangeBetween(p1, p2).sumOf { if (it in emptyLines) expansion else 1 }
 }

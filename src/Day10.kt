@@ -81,7 +81,7 @@ private tailrec fun followPipes(map: StringArray2D, borderMap: Array<Array<Boole
 
     val nextOutDirs = parsePipe(cell)
     val dirAsOut = dir.opposite()
-    if (!nextOutDirs.contains(dirAsOut)) {
+    if (dirAsOut !in nextOutDirs) {
         assert(allowInvalid)
         return null
     }

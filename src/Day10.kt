@@ -5,18 +5,6 @@ fun main() = test(
     ::solve,
 )
 
-private class StringArray2D(private val rows: List<String>) {
-
-    operator fun get(row: Int, col: Int): Char =
-        rows[row][col]
-
-    fun getOrNull(row: Int, col: Int): Char? =
-        rows.getOrNull(row)?.getOrNull(col)
-
-    val height: Int get() = rows.size
-    val width: Int get() = rows[0].length
-}
-
 private fun solve(input: List<String>): Pair<Long, Long> {
     val map = StringArray2D(input)
 

@@ -13,6 +13,7 @@ fun readInput(name: String) = Path("src/$name.txt").readLines()
 /**
  * Converts string to md5 hash.
  */
+@Suppress("unused")
 fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray()))
     .toString(16)
     .padStart(32, '0')
@@ -64,3 +65,28 @@ fun test(vararg parts: (List<String>) -> Any) {
         }
     }
 }
+
+class StringArray2D(private val strings: List<String>) {
+
+    val height: Int get() = strings.size
+    val width: Int get() = strings[0].length
+
+    operator fun get(row: Int, col: Int): Char =
+        strings[row][col]
+
+    fun getOrNull(row: Int, col: Int): Char? =
+        strings.getOrNull(row)?.getOrNull(col)
+
+    val rows: Sequence<Sequence<Char>>
+        get() = (0 until height).asSequence().map { row(it) }
+
+    val cols: Sequence<Sequence<Char>>
+        get() = (0 until width).asSequence().map { col(it) }
+
+    fun row(row: Int): Sequence<Char> =
+        (0 until width).asSequence().map { get(row, it) }
+
+    fun col(col: Int): Sequence<Char> =
+        (0 until height).asSequence().map { get(it, col) }
+}
+

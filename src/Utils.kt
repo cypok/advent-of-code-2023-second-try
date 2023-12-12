@@ -28,7 +28,7 @@ inline fun <T> Iterable<T>.productOf(selector: (T) -> Long): Long =
 @Deprecated("just don't use it")
 fun Any?.println() = println(this)
 
-private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part([12])(?:\b|_).*""")
+private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part(\d)(?:\b|_).*""")
 
 fun test(vararg parts: (List<String>) -> Any) {
     val className = Throwable().stackTrace

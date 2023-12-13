@@ -6,7 +6,7 @@ fun main() = test(
 private fun solve(input: List<String>, expectedSmudgesCount: Int): Long {
     return input.split("").sumOf { map ->
         when (val ref = solveOne(StringArray2D(map.toList()), expectedSmudgesCount)) {
-            is Reflection.Vertical ->ref.col
+            is Reflection.Vertical -> ref.col
             is Reflection.Horizontal -> ref.row * 100
         }.toLong()
     }
@@ -29,16 +29,8 @@ private fun solveOne(map: StringArray2D, expectedSmudgesCount: Int): Reflection 
 }
 
 private fun countSmudges(row: List<Char>, colNum: Int): Int {
-    var l = colNum - 1
-    var r = colNum
-    var smudges = 0
-    while (0 <= l && r < row.size) {
-        if (row[l] != row[r]) {
-            // We might be able to check smudges overflow earlier, but it isn't required.
-            smudges++
-        }
-        l--
-        r++
-    }
-    return smudges
+    // We might be able to check smudges overflow earlier, but it isn't required.
+    val leftPart = row.slice(colNum - 1 downTo 0)
+    val rightPart = row.slice(colNum until row.size)
+    return (leftPart zip rightPart).count { (l, r) -> l != r }
 }

@@ -22,6 +22,21 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
 inline fun <T> Iterable<T>.productOf(selector: (T) -> Long): Long =
     fold(1) { acc, x -> acc * selector(x) }
 
+fun <T> List<T>.split(separator: T): Sequence<Sequence<T>> = sequence {
+    val remaining = this@split.iterator()
+    while (remaining.hasNext()) {
+        yield(sequence {
+            while (remaining.hasNext()) {
+                val elem = remaining.next()
+                if (elem == separator) {
+                    break
+                }
+                yield(elem)
+            }
+        })
+    }
+}
+
 /**
  * The cleaner shorthand for printing output.
  */

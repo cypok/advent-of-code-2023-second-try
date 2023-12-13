@@ -25,7 +25,7 @@ private fun solve(input: List<String>, expansion: Int): Long {
     return totalDistance
 }
 
-private fun collectEmptyLines(lines: Sequence<Sequence<Char>>): Set<Int> {
+private fun collectEmptyLines(lines: List<List<Char>>): Set<Int> {
     return lines.withIndex()
         .filter { it.value.all { it == '.' } }
         .map { it.index }.toSet()

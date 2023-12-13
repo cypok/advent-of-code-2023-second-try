@@ -77,16 +77,28 @@ class StringArray2D(private val strings: List<String>) {
     fun getOrNull(row: Int, col: Int): Char? =
         strings.getOrNull(row)?.getOrNull(col)
 
-    val rows: Sequence<Sequence<Char>>
-        get() = (0 until height).asSequence().map { row(it) }
+    val rows: List<List<Char>> =
+        object : AbstractList<List<Char>>() {
+            override val size: Int get() = height
+            override fun get(index: Int): List<Char> = row(index)
+        }
 
-    val cols: Sequence<Sequence<Char>>
-        get() = (0 until width).asSequence().map { col(it) }
+    val cols: List<List<Char>> =
+        object : AbstractList<List<Char>>() {
+            override val size: Int get() = width
+            override fun get(index: Int): List<Char> = col(index)
+        }
 
-    fun row(row: Int): Sequence<Char> =
-        (0 until width).asSequence().map { get(row, it) }
+    fun row(row: Int): List<Char> =
+        object : AbstractList<Char>() {
+            override val size: Int get() = width
+            override fun get(index: Int): Char = get(row, index)
+        }
 
-    fun col(col: Int): Sequence<Char> =
-        (0 until height).asSequence().map { get(it, col) }
+    fun col(col: Int): List<Char> =
+        object : AbstractList<Char>() {
+            override val size: Int get() = height
+            override fun get(index: Int): Char = get(index, col)
+        }
 }
 

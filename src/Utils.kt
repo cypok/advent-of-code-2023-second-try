@@ -117,3 +117,4 @@ class StringArray2D(private val strings: List<String>) {
         }
 }
 
+operator fun <T> Array<Array<T>>.get(i: Int, j: Int): T = this[i][j]

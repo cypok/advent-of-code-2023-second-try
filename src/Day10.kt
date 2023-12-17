@@ -19,18 +19,6 @@ private fun solve(input: List<String>): Pair<Long, Long> {
     throw IllegalArgumentException("start not found")
 }
 
-private enum class Dir {
-    UP, DOWN, LEFT, RIGHT;
-
-    fun opposite() =
-        when (this) {
-            UP -> DOWN
-            DOWN -> UP
-            LEFT -> RIGHT
-            RIGHT -> LEFT
-        }
-}
-
 private val pipes = mapOf(
     '|' to setOf(Dir.UP, Dir.DOWN),
     '-' to setOf(Dir.LEFT, Dir.RIGHT),
@@ -43,20 +31,12 @@ private val pipes = mapOf(
 private fun parsePipe(ch: Char): Set<Dir> =
     pipes[ch].orEmpty()
 
-private fun moveInDir(row: Int, col: Int, dir: Dir) =
-    when (dir) {
-        Dir.UP -> Pair(row - 1, col)
-        Dir.DOWN -> Pair(row + 1, col)
-        Dir.LEFT -> Pair(row, col - 1)
-        Dir.RIGHT -> Pair(row, col + 1)
-    }
-
 private fun startAt(map: StringArray2D, startRow: Int, startCol: Int): Pair<Long, Long> {
     val borderMap = Array(map.height) { Array(map.width) { false } }
     for (dir in Dir.entries) {
         followPipes(map, borderMap, startRow, startCol, dir, 0, allowInvalid = true)?.let { (length, returnDir) ->
             val maxDist = (length + 1) / 2
-            val startDirs = setOf(dir, returnDir.opposite())
+            val startDirs = setOf(dir, returnDir.opposite)
             val startPipe = pipes.entries.find { it.value == startDirs }!!.key
             val area = calcInsideArea(map, borderMap, startPipe)
             return Pair(maxDist, area)
@@ -80,7 +60,7 @@ private tailrec fun followPipes(map: StringArray2D, borderMap: Array<Array<Boole
     }
 
     val nextOutDirs = parsePipe(cell)
-    val dirAsOut = dir.opposite()
+    val dirAsOut = dir.opposite
     if (dirAsOut !in nextOutDirs) {
         assert(allowInvalid)
         return null

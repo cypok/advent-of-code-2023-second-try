@@ -20,6 +20,16 @@ enum class Dir {
     val right
         get() = left.opposite
 
+    companion object {
+        fun fromChar(ch: Char) = when (ch) {
+            'U' -> UP
+            'D' -> DOWN
+            'L' -> LEFT
+            'R' -> RIGHT
+            else -> throw IllegalArgumentException(ch.toString())
+        }
+    }
+
 }
 
 fun moveInDir(pos: Pair<Int, Int>, dir: Dir) =

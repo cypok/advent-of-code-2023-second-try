@@ -121,3 +121,18 @@ operator fun <T> Array<Array<T>>.get(i: Int, j: Int): T = this[i][j]
 operator fun <T> Array<Array<T>>.get(pos: Pair<Int, Int>): T = this[pos.first][pos.second]
 operator fun <T> Array<Array<T>>.set(i: Int, j: Int, v: T) { this[i][j] = v }
 operator fun <T> Array<Array<T>>.set(pos: Pair<Int, Int>, v: T) { this[pos.first][pos.second] = v }
+
+/**
+ * Transform
+ *
+ *     [[a,b], [c], [d,e]]
+ *
+ * to
+ *
+ *     [[a,c,d], [a,c,e], [b,c,d], [b,c,e]]
+ */
+fun <T> Collection<Iterable<T>>.cartesianProduct(): List<List<T>> {
+    if (isEmpty()) return listOf(emptyList())
+    val tails = drop(1).cartesianProduct()
+    return first().flatMap { head -> tails.map { tail -> listOf(head) + tail } }
+}

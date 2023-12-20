@@ -1,5 +1,6 @@
 fun main() = test(
-    ::solve,
+    ::solve1,
+    ::solve2,
 )
 
 private data class Rule(
@@ -11,12 +12,13 @@ private sealed class Command {
     abstract val nextRuleName: String
 
     abstract fun test(p: Part): Boolean
+    abstract fun partition(p: PartRange): Pair<PartRange?, PartRange?>
 
     data class Unconditional(
         override val nextRuleName: String,
     ) : Command() {
-        override fun test(p: Part): Boolean =
-            true
+        override fun test(p: Part) = true
+        override fun partition(p: PartRange) = Pair(p, null)
     }
 
     data class Conditional(
@@ -25,20 +27,92 @@ private sealed class Command {
         val value: Int,
         override val nextRuleName: String,
     ) : Command() {
+
         override fun test(p: Part): Boolean {
             val actualValue = p[checkedComponent]!!
             return when (condition) {
-                '>' -> actualValue > value
                 '<' -> actualValue < value
+                '>' -> actualValue > value
                 else -> throw IllegalStateException(this.toString())
             }
+        }
+
+        override fun partition(p: PartRange): Pair<PartRange?, PartRange?> {
+            val actualRange = p[checkedComponent]!!
+            val posAndNeg = when (condition) {
+                '<' -> listOf(IntRange(MIN_VALUE, value - 1), IntRange(value, MAX_VALUE))
+                '>' -> listOf(IntRange(value + 1, MAX_VALUE), IntRange(MIN_VALUE, value))
+                else -> throw IllegalStateException(this.toString())
+            }
+            val (pos, neg) = posAndNeg.map { filtered ->
+                (p + (checkedComponent to (filtered intersect actualRange))).validOrNull
+            }
+            return Pair(pos, neg)
         }
     }
 }
 
-private typealias Part = Map<Char, Int>
 
-private fun solve(input: List<String>): Long {
+private typealias Part = Map<Char, Int>
+private typealias PartRange = Map<Char, IntRange>
+
+private val PartRange.isValid: Boolean
+    get() = values.all { !it.isEmpty() }
+
+private val PartRange.validOrNull: PartRange?
+    get() = if (isValid) this else null
+
+private val PartRange.cardinality: Long
+    get() = values.productOf { it.size.toLong() }
+
+
+private const val START_RULE = "in"
+private const val MIN_VALUE = 1
+private const val MAX_VALUE = 4000
+private val WHOLE_RANGE = IntRange(MIN_VALUE, MAX_VALUE)
+
+private fun solve1(input: List<String>): Long {
+    val (rules, parts: List<Part>) = parse(input)
+
+    tailrec fun applyRule(part: Part, rule: String): Boolean =
+        when (rule) {
+            "R" -> false
+            "A" -> true
+            else -> applyRule(part, rules[rule]!!.commands.first { it.test(part) }.nextRuleName)
+        }
+
+    return parts.filter { applyRule(it, START_RULE) }.sumOf { it.values.sum().toLong() }
+}
+
+private fun solve2(input: List<String>): Long {
+    val (rules, _) = parse(input)
+
+    val acceptedParts = mutableListOf<PartRange>()
+
+    fun applyRule(part: PartRange, rule: String) {
+        when (rule) {
+            "R" -> {}
+            "A" -> acceptedParts += part
+            else -> {
+                fun applyCmds(p: PartRange, cmds: List<Command>) {
+                    val cmd = cmds.first()
+                    val (pos, neg) = cmd.partition(p)
+                    pos?.let { applyRule(it, cmd.nextRuleName) }
+                    neg?.let { applyCmds(it, cmds.drop(1)) }
+                }
+
+                applyCmds(part, rules[rule]!!.commands)
+            }
+        }
+    }
+
+    val initialPart = "xmas".associate { it to WHOLE_RANGE }
+    applyRule(initialPart, START_RULE)
+
+    return acceptedParts.sumOf { it.cardinality }
+}
+
+private fun parse(input: List<String>): Pair<Map<String, Rule>, List<Part>> {
     val (ruleStrs, partStrs) = input.split("").map { it.toList() }.toList()
 
     val ruleRegex = """(.+)\{(.+)\}""".toRegex()
@@ -65,15 +139,5 @@ private fun solve(input: List<String>): Long {
             name[0] to value.toInt()
         }
     }
-
-    tailrec fun applyRules(part: Part, rule: String): Boolean =
-        when (rule) {
-            "A" -> true
-            "R" -> false
-            else -> applyRules(part, rules[rule]!!.commands.first { it.test(part) }.nextRuleName)
-        }
-
-    val startRule = "in"
-
-    return parts.filter { applyRules(it, startRule) }.sumOf { it.values.sum().toLong() }
+    return Pair(rules, parts)
 }

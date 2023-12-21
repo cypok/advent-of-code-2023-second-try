@@ -68,15 +68,18 @@ private fun solve2(input: List<String>): Pair<Int, Long> {
         }
 
     val measure = 2000
-    val rem = 1_000_000_000 - measure
 
-    val lastLoads = (0 until measure).map {
+    val loads = CyclicState(-1L)
+
+    for (i in 0 until measure) {
         tiltCycle()
-        calcLoadN()
+        loads.current = calcLoadN()
+        loads.tick(i.toLong())
     }
-    val cycle = detectCycle(lastLoads, skipInit = measure / 2)
+
+    val cycle = loads.detectCycle()
         ?: throw IllegalStateException("cycle not found")
-    val realLastLoad = lastLoads[lastLoads.size - 1 - cycle + rem % cycle]
+    val realLastLoad = loads.extrapolateUntil(1_000_000_000)
 
     return Pair(cycle, realLastLoad)
 }

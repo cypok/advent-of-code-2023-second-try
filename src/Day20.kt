@@ -5,21 +5,7 @@ fun main() = test(
     ::solve2,
 )
 
-private class State<T>(initial: T) {
-    var current = initial
-
-    private var previous = mutableListOf<T>()
-
-    fun tick(time: Long) {
-        check(previous.size.toLong() == time)
-        previous += current
-    }
-
-    fun detectCycle(): Long? =
-        detectCycle(previous, previous.size/10)?.toLong()
-}
-
-private fun State<Pulse>.toPulseString() =
+private fun CyclicState<Pulse>.toPulseString() =
     "${this.current.toPulseString()}/${this.detectCycle() ?: "?"}"
 
 private sealed class Module(val name: String, val outputNames: List<String>) {
@@ -49,7 +35,7 @@ private sealed class Module(val name: String, val outputNames: List<String>) {
     }
 
     class FlipFlop(name: String, outputs: List<String>) : Module(name, outputs) {
-        private var state = State(false)
+        private var state = CyclicState(false)
 
         override fun process(inputs: List<Signal>) =
             if (inputs.all { it.value }) {
@@ -63,17 +49,17 @@ private sealed class Module(val name: String, val outputNames: List<String>) {
             state.tick(time)
 
         override fun detectStateCycle(): Long? =
-            state.detectCycle()
+            state.detectCycle()?.toLong()
 
         override fun extraToString(): String =
             state.toPulseString()
     }
 
     class Conjunction(name: String, outputs: List<String>) : Module(name, outputs) {
-        val state = mutableMapOf<String, State<Pulse>>()
+        val state = mutableMapOf<String, CyclicState<Pulse>>()
 
         override fun prepareInput(input: String) {
-            state[input] = State(false)
+            state[input] = CyclicState(false)
         }
 
         override fun process(inputs: List<Signal>): List<Pulse> =
@@ -84,13 +70,10 @@ private sealed class Module(val name: String, val outputNames: List<String>) {
             }
 
         override fun stateTick(time: Long) =
-            state.values.forEach { it.tick(time) }
+            state.values.tickAll(time)
 
-        override fun detectStateCycle(): Long? {
-            return state.values.map { it.detectCycle() }.reduce { c1, c2 ->
-                if (c1 != null && c2 != null) lcm(c1, c2) else null
-            }
-        }
+        override fun detectStateCycle(): Long? =
+            state.values.detectCommonCycle()
 
         override fun extraToString(): String {
             val commonCycle = detectStateCycle()

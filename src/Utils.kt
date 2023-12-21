@@ -152,23 +152,6 @@ fun gcd(x: Long, y: Long): Long {
 
 fun lcm(x: Long, y: Long) = x / gcd(x, y) * y
 
-fun <T> detectCycle(values: List<T>, skipInit: Int = 0): Int? {
-    fun getLast(idxFromEnd: Int) =
-        values[values.size - 1 - idxFromEnd]
-
-    fun isCycle(len: Int): Boolean {
-        for (i in len until values.size - skipInit) {
-            if (getLast(i) != getLast(i % len)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    return (1 until values.size / 2)
-        .firstOrNull { isCycle(it) }
-}
-
 fun Long.toIntExact() = Math.toIntExact(this)
 
 inline fun <T, R> Pair<T, T>.map(transform: (T) -> R): Pair<R, R> =

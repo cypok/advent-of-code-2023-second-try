@@ -3,6 +3,8 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.time.measureTimedValue
 
 /**
@@ -136,3 +138,38 @@ fun <T> Collection<Iterable<T>>.cartesianProduct(): List<List<T>> {
     val tails = drop(1).cartesianProduct()
     return first().flatMap { head -> tails.map { tail -> listOf(head) + tail } }
 }
+
+fun gcd(x: Long, y: Long): Long {
+    var a = max(x, y)
+    var b = min(x, y)
+    while (b > 0L) {
+        val rem = a % b
+        a = b
+        b = rem
+    }
+    return a
+}
+
+fun lcm(x: Long, y: Long) = x / gcd(x, y) * y
+
+fun <T> detectCycle(values: List<T>, skipInit: Int = 0): Int? {
+    fun getLast(idxFromEnd: Int) =
+        values[values.size - 1 - idxFromEnd]
+
+    fun isCycle(len: Int): Boolean {
+        for (i in len until values.size - skipInit) {
+            if (getLast(i) != getLast(i % len)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    return (1 until values.size / 2)
+        .firstOrNull { isCycle(it) }
+}
+
+fun Long.toIntExact() = Math.toIntExact(this)
+
+inline fun <T, R> Pair<T, T>.map(transform: (T) -> R): Pair<R, R> =
+    Pair(transform(first), transform(second))

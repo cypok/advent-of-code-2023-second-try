@@ -5,10 +5,39 @@ fun main() = test(
     ::solve2,
 )
 
+private class State<T>(initial: T) {
+    var current = initial
+
+    private var previous = mutableListOf<T>()
+
+    fun tick(time: Long) {
+        check(previous.size.toLong() == time)
+        previous += current
+    }
+
+    fun detectCycle(): Long? =
+        detectCycle(previous, previous.size/10)?.toLong()
+}
+
+private fun State<Pulse>.toPulseString() =
+    "${this.current.toPulseString()}/${this.detectCycle() ?: "?"}"
+
 private sealed class Module(val name: String, val outputNames: List<String>) {
+    open fun prepareInput(input: String): Unit = Unit
+
     abstract fun process(inputs: List<Signal>): List<Pulse>
 
-    open fun prepareInput(input: String): Unit {
+    open fun stateTick(time: Long): Unit = Unit
+
+    open fun detectStateCycle(): Long? = 1
+
+    final override fun toString() = "$name{${extraToString()}}"
+
+    protected open fun extraToString() = ""
+
+    class Output(name: String) : Module(name, emptyList()) {
+        override fun process(inputs: List<Signal>): List<Pulse> =
+            emptyList()
     }
 
     class Broadcaster(outputs: List<String>) : Module(NAME, outputs) {
@@ -20,37 +49,67 @@ private sealed class Module(val name: String, val outputNames: List<String>) {
     }
 
     class FlipFlop(name: String, outputs: List<String>) : Module(name, outputs) {
-        var state = false
+        private var state = State(false)
 
         override fun process(inputs: List<Signal>) =
             if (inputs.all { it.value }) {
                 emptyList()
             } else {
-                state = !state
-                listOf(state)
+                state.current = !state.current
+                listOf(state.current)
             }
+
+        override fun stateTick(time: Long) =
+            state.tick(time)
+
+        override fun detectStateCycle(): Long? =
+            state.detectCycle()
+
+        override fun extraToString(): String =
+            state.toPulseString()
     }
 
     class Conjunction(name: String, outputs: List<String>) : Module(name, outputs) {
-        var state = mutableMapOf<String, Pulse>()
+        val state = mutableMapOf<String, State<Pulse>>()
+
+        override fun prepareInput(input: String) {
+            state[input] = State(false)
+        }
 
         override fun process(inputs: List<Signal>): List<Pulse> =
             inputs.map {
-                state += it.src to it.value
-                !state.values.all { it }
+                state[it.src]!!.current = it.value
+                val allHigh = state.values.all { it.current }
+                !allHigh
             }
 
-        override fun prepareInput(input: String): Unit {
-            state[input] = false
+        override fun stateTick(time: Long) =
+            state.values.forEach { it.tick(time) }
+
+        override fun detectStateCycle(): Long? {
+            return state.values.map { it.detectCycle() }.reduce { c1, c2 ->
+                if (c1 != null && c2 != null) lcm(c1, c2) else null
+            }
+        }
+
+        override fun extraToString(): String {
+            val commonCycle = detectStateCycle()
+            val internals = if (true) {
+                "/" + state.entries.joinToString { (src, state) -> "$src: ${state.toPulseString()}" }
+            } else {
+                ""
+            }
+            return "($commonCycle)$internals"
         }
     }
 }
 
 private typealias Pulse = Boolean
+private fun Pulse.toPulseString() = if (this) "1" else "0"
 
 private data class Signal(val src: String, val value: Pulse, val dst: String) {
     override fun toString(): String =
-        "$src -${if (value) "high" else "low"}-> $dst"
+        "$src -${value.toPulseString()}-> $dst"
 }
 
 private fun parseModules(input: List<String>): Map<String, Module> {
@@ -64,21 +123,44 @@ private fun parseModules(input: List<String>): Map<String, Module> {
             else -> throw IllegalArgumentException(it)
         }
         module.name to module
-    }
+    }.toMutableMap()
 
-    for ((_, src) in modules) {
+    val plainOutputs = modules.values.flatMap { it.outputNames }.filter { it !in modules }.map { Output(it) }
+    modules += plainOutputs.associateBy { it.name }
+
+    for (src in modules.values) {
         for (dst in src.outputNames) {
-            modules[dst]?.prepareInput(src.name)
+            modules[dst]!!.prepareInput(src.name)
         }
     }
 
     return modules
 }
 
+@Suppress("unused")
+private fun modulesToGraphviz(modules: Map<String, Module>): String =
+    with(StringBuilder()) {
+        appendLine("digraph G {")
+        for (src in modules.values) {
+            val shape = when (src) {
+                is Broadcaster -> "doublecircle"
+                is Conjunction -> "pentagon"
+                is FlipFlop -> "invtriangle"
+                is Output -> "star"
+            }
+            appendLine(" ${src.name} [ shape=$shape ];")
+            for (dst in src.outputNames) {
+                appendLine(" ${src.name} -> $dst;")
+            }
+        }
+        appendLine("}")
+        toString()
+    }
+
 private fun sendSignals(modules: Map<String, Module>, signals: List<Signal>): List<Signal> =
     signals.groupBy { it.dst }.flatMap { (dst, ss) ->
-        val module = modules[dst] ?: return@flatMap emptyList()
-        val newPulses = module.process(ss) ?: return@flatMap emptyList()
+        val module = modules[dst]!!
+        val newPulses = module.process(ss)
         newPulses.flatMap { newPulse ->
             module.outputNames.map { Signal(dst, newPulse, it) }
         }
@@ -117,12 +199,35 @@ private fun solve1(input: List<String>): Long {
 private fun solve2(input: List<String>): Long {
     val modules = parseModules(input)
 
+    if (false) println()
     var times = 0L
     while (true) {
+        modules.forEach { it.value.stateTick(times) }
+
+        if (times % 10000 == 0L) {
+            val (cyclic, acyclic) = modules.values
+                .map { it.detectStateCycle() }
+                .partition { it != null }
+            val commonCycle =
+                if (acyclic.isEmpty()) cyclic.reduce { a, b -> lcm(a!!, b!!) } else null
+
+            if (false) {
+                val cycleInfo =
+                    if (commonCycle != null) {
+                        "common cycle $commonCycle}"
+                    } else {
+                        "not yet ${cyclic.size}/${acyclic.size}"
+                    }
+                println("$times ($cycleInfo) : ${modules.values.joinToString { it.toString() }}")
+            }
+
+            if (commonCycle != null) {
+                return commonCycle
+            }
+        }
+
         times++
         val (_, _, finish) = pressButtonAndWait(modules)
-        if (finish) {
-            return times
-        }
+        assert(!finish) { "universe collapsed?!" }
     }
 }

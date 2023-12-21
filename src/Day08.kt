@@ -47,19 +47,6 @@ private fun part1(input: List<String>): Long {
     return steps
 }
 
-private fun gcd(x: Long, y: Long): Long {
-    var a = max(x, y)
-    var b = min(x, y)
-    while (b > 1L) {
-        val rem = a % b
-        a = b
-        b = rem
-    }
-    return a
-}
-
-private fun lcm(x: Long, y: Long) = x / gcd(x, y) * y
-
 private fun part2(input: List<String>): Long {
     val (instructions, network) = parse(input)
 

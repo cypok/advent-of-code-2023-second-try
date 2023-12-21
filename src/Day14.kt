@@ -67,36 +67,16 @@ private fun solve2(input: List<String>): Pair<Int, Long> {
             }
         }
 
-    val pre = 1000
-    val measure = 1000
-    val rem = 1_000_000_000 - pre - measure
+    val measure = 2000
+    val rem = 1_000_000_000 - measure
 
-    repeat(pre) {
-        tiltCycle()
-    }
     val lastLoads = (0 until measure).map {
         tiltCycle()
         calcLoadN()
     }
-    fun lastLoad(idxFromEnd: Int) =
-        lastLoads[lastLoads.size - 1 - idxFromEnd]
-
-    val checkCycleTimes = 5
-    fun isCycle(len: Int): Boolean {
-        for (i in 0 until len) {
-            for (j in 1 until checkCycleTimes) {
-                if (lastLoad(i) != lastLoad(i + len * j)) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
-
-    val cycle = (1 until measure/checkCycleTimes)
-        .firstOrNull { isCycle(it) }
+    val cycle = detectCycle(lastLoads, skipInit = measure / 2)
         ?: throw IllegalStateException("cycle not found")
-    val realLastLoad = lastLoad(cycle - rem % cycle)
+    val realLastLoad = lastLoads[lastLoads.size - 1 - cycle + rem % cycle]
 
     return Pair(cycle, realLastLoad)
 }

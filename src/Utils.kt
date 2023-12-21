@@ -129,6 +129,7 @@ operator fun <T> Array<Array<T>>.get(i: Int, j: Int): T = this[i][j]
 operator fun <T> Array<Array<T>>.get(pos: Pair<Int, Int>): T = this[pos.first][pos.second]
 operator fun <T> Array<Array<T>>.set(i: Int, j: Int, v: T) { this[i][j] = v }
 operator fun <T> Array<Array<T>>.set(pos: Pair<Int, Int>, v: T) { this[pos.first][pos.second] = v }
+fun <T> Array<Array<T>>.getOrNull(pos: Pair<Int, Int>): T? = this.getOrNull(pos.first)?.getOrNull(pos.second)
 
 /**
  * Transform

@@ -163,3 +163,5 @@ fun Long.toIntExact() = Math.toIntExact(this)
 
 inline fun <T, R> Pair<T, T>.map(transform: (T) -> R): Pair<R, R> =
     Pair(transform(first), transform(second))
+
+operator fun <T> List<T>.component6() = get(5)

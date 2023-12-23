@@ -46,8 +46,16 @@ private fun startAt(map: StringArray2D, startRow: Int, startCol: Int): Pair<Long
     throw IllegalStateException("no pipe connection to start is found")
 }
 
-private tailrec fun followPipes(map: StringArray2D, borderMap: Array<Array<Boolean>>, row: Int, col: Int, dir: Dir, length: Long, allowInvalid: Boolean = false): Pair<Long, Dir>? {
-    val (nextRow, nextCol) = moveInDir(row, col, dir)
+private tailrec fun followPipes(
+    map: StringArray2D,
+    borderMap: Array<Array<Boolean>>,
+    row: Int,
+    col: Int,
+    dir: Dir,
+    length: Long,
+    allowInvalid: Boolean = false
+): Pair<Long, Dir>? {
+    val (nextRow, nextCol) = (row x col).moveInDir(dir)
 
     val cell = map.getOrNull(nextRow, nextCol)
     if (cell == null) {

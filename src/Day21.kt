@@ -18,8 +18,8 @@ private fun solveFinite(input: List<String>, steps: Int): Long {
         }
     }
 
-    fun step(dir: Dir, base: Pair<Int, Int>, s: Int) {
-        val next = moveInDir(base, dir)
+    fun step(dir: Dir, base: Point, s: Int) {
+        val next = base.moveInDir(dir)
         val ch = map.getOrNull(next) ?: return
         if (ch == '#') return
         val old = moves[next]
@@ -32,8 +32,8 @@ private fun solveFinite(input: List<String>, steps: Int): Long {
     repeat(steps) { s ->
         for (i in 0 until map.height) {
             for (j in 0 until map.width) {
-                if (moves[i, j] == s) {
-                    val base = Pair(i, j)
+                val base = i x j
+                if (moves[base] == s) {
                     step(UP, base, s)
                     step(LEFT, base, s)
                     step(DOWN, base, s)
@@ -56,7 +56,7 @@ private fun solveInfinite(input: List<String>, totalSteps: Int): Long {
     val multiplier = 1 + 3 * enoughSteps / min(map.width, map.height)
     val marks = Array(map.height * multiplier) { Array(map.width * multiplier) { -1 } }
 
-    fun posForMap(p: Pair<Int, Int>) = Pair(p.first.mod(map.height), p.second.mod(map.width))
+    fun posForMap(p: Point) = p.row.mod(map.height) x p.col.mod(map.width)
 
     for (i in 0 until map.height) {
         for (j in 0 until map.width) {
@@ -66,8 +66,8 @@ private fun solveInfinite(input: List<String>, totalSteps: Int): Long {
         }
     }
 
-    fun step(dir: Dir, base: Pair<Int, Int>, s: Int): Boolean {
-        val next = moveInDir(base, dir)
+    fun step(dir: Dir, base: Point, s: Int): Boolean {
+        val next = base.moveInDir(dir)
         val ch = map[posForMap(next)]
         if (ch == '#') return false
         val old = marks[next]
@@ -89,7 +89,7 @@ private fun solveInfinite(input: List<String>, totalSteps: Int): Long {
         var reachedLimit = false
         for (i in marks.indices) {
             for (j in marks[i].indices) {
-                val base = Pair(i, j)
+                val base = i x j
                 if (marks[base] == s) {
                     step(UP, base, s)
                     if (step(LEFT, base, s) && i == leftLimitNext) {

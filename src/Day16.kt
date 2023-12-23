@@ -7,27 +7,27 @@ fun main() = test(
 
 private fun solve1(input: List<String>): Long {
     val map = StringArray2D(input)
-    return calculateEnergy(map, Pair(0, 0), RIGHT)
+    return calculateEnergy(map, Point(0, 0), RIGHT)
 }
 
 private fun solve2(input: List<String>): Long {
     val map = StringArray2D(input)
     return sequence {
         for (i in 0 until map.height) {
-            yield(calculateEnergy(map, Pair(i, 0), RIGHT))
-            yield(calculateEnergy(map, Pair(i, map.width - 1), LEFT))
+            yield(calculateEnergy(map, Point(i, 0), RIGHT))
+            yield(calculateEnergy(map, Point(i, map.width - 1), LEFT))
         }
         for (j in 0 until map.width) {
-            yield(calculateEnergy(map, Pair(0, j), DOWN))
-            yield(calculateEnergy(map, Pair(map.height - 1, j), UP))
+            yield(calculateEnergy(map, Point(0, j), DOWN))
+            yield(calculateEnergy(map, Point(map.height - 1, j), UP))
         }
     }.max()
 }
 
-private fun calculateEnergy(map: StringArray2D, startPos: Pair<Int, Int>, startDir: Dir): Long {
+private fun calculateEnergy(map: StringArray2D, startPos: Point, startDir: Dir): Long {
     val beams = Array(map.height) { Array(map.width) { mutableSetOf<Dir>() } }
 
-    tailrec fun traverse(pos: Pair<Int, Int>, dir: Dir) {
+    tailrec fun traverse(pos: Point, dir: Dir) {
         val (i, j) = pos
         if (map.getOrNull(i, j) == null) return
         if (dir in beams[i, j]) return
@@ -67,11 +67,11 @@ private fun calculateEnergy(map: StringArray2D, startPos: Pair<Int, Int>, startD
 
         if (dirs.size == 2) {
             @Suppress("NON_TAIL_RECURSIVE_CALL")
-            traverse(moveInDir(pos, dirs[1]), dirs[1])
+            traverse(pos.moveInDir(dirs[1]), dirs[1])
         } else {
             assert(dirs.size == 1)
         }
-        traverse(moveInDir(pos, dirs[0]), dirs[0])
+        traverse(pos.moveInDir(dirs[0]), dirs[0])
     }
 
     traverse(startPos, startDir)

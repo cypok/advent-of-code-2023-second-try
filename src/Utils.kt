@@ -83,54 +83,6 @@ fun test(vararg parts: (List<String>) -> Any) {
     }
 }
 
-class StringArray2D(private val strings: List<String>) {
-
-    val height: Int get() = strings.size
-    val width: Int get() = strings[0].length
-
-    operator fun get(row: Int, col: Int): Char =
-        strings[row][col]
-
-    operator fun get(pos: Pair<Int, Int>): Char =
-        get(pos.first, pos.second)
-
-    fun getOrNull(row: Int, col: Int): Char? =
-        strings.getOrNull(row)?.getOrNull(col)
-
-    fun getOrNull(pos: Pair<Int, Int>): Char? =
-        getOrNull(pos.first, pos.second)
-
-    val rows: List<List<Char>> =
-        object : AbstractList<List<Char>>() {
-            override val size: Int get() = height
-            override fun get(index: Int): List<Char> = row(index)
-        }
-
-    val cols: List<List<Char>> =
-        object : AbstractList<List<Char>>() {
-            override val size: Int get() = width
-            override fun get(index: Int): List<Char> = col(index)
-        }
-
-    fun row(row: Int): List<Char> =
-        object : AbstractList<Char>() {
-            override val size: Int get() = width
-            override fun get(index: Int): Char = get(row, index)
-        }
-
-    fun col(col: Int): List<Char> =
-        object : AbstractList<Char>() {
-            override val size: Int get() = height
-            override fun get(index: Int): Char = get(index, col)
-        }
-}
-
-operator fun <T> Array<Array<T>>.get(i: Int, j: Int): T = this[i][j]
-operator fun <T> Array<Array<T>>.get(pos: Pair<Int, Int>): T = this[pos.first][pos.second]
-operator fun <T> Array<Array<T>>.set(i: Int, j: Int, v: T) { this[i][j] = v }
-operator fun <T> Array<Array<T>>.set(pos: Pair<Int, Int>, v: T) { this[pos.first][pos.second] = v }
-fun <T> Array<Array<T>>.getOrNull(pos: Pair<Int, Int>): T? = this.getOrNull(pos.first)?.getOrNull(pos.second)
-
 /**
  * Transform
  *

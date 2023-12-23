@@ -6,7 +6,7 @@ fun main() = test(
     { solve(it, 4, 10) },
 )
 
-private data class Arrow(val dst: Pair<Int, Int>, val dir: Dir, val len: Int, val heat: Long, val prev: Arrow?)
+private data class Arrow(val dst: Point, val dir: Dir, val len: Int, val heat: Long, val prev: Arrow?)
 
 private fun solve(input: List<String>, minLen: Int, maxLen: Int): Long {
     val heatMap = StringArray2D(input)
@@ -32,8 +32,8 @@ private fun solve(input: List<String>, minLen: Int, maxLen: Int): Long {
         queue += arr
     }
 
-    go(Arrow(0 to 1, RIGHT, 1, initialHeat, null))
-    go(Arrow(1 to 0, DOWN, 1, initialHeat, null))
+    go(Arrow(0 x 1, RIGHT, 1, initialHeat, null))
+    go(Arrow(1 x 0, DOWN, 1, initialHeat, null))
 
     while (true) {
         val arr = queue.poll()
@@ -44,13 +44,13 @@ private fun solve(input: List<String>, minLen: Int, maxLen: Int): Long {
         if (arr.len >= minLen) {
             marksMap[arr.dst][arr.dir to arr.len] = arr.heat
 
-            if (arr.dst.first == heatMap.height - 1 && arr.dst.second == heatMap.width - 1) {
+            if (arr.dst.row == heatMap.height - 1 && arr.dst.col == heatMap.width - 1) {
                 return newHeat
             }
         }
 
         fun turn(newDir: Dir) {
-            go(Arrow(moveInDir(arr.dst, newDir), newDir,
+            go(Arrow(arr.dst.moveInDir(newDir), newDir,
                 1, newHeat,
                 arr))
         }
@@ -59,7 +59,7 @@ private fun solve(input: List<String>, minLen: Int, maxLen: Int): Long {
             turn(arr.dir.right)
         }
 
-        go(Arrow(moveInDir(arr.dst, arr.dir), arr.dir,
+        go(Arrow(arr.dst.moveInDir(arr.dir), arr.dir,
             arr.len + 1, newHeat,
             arr))
     }

@@ -1,24 +1,34 @@
+import java.nio.file.Files
+import java.util.concurrent.TimeUnit
+import kotlin.io.path.pathString
+import kotlin.io.path.readText
+import kotlin.io.path.writeLines
 import kotlin.math.abs
 
 fun main() = test(
     ::solve1,
+    ::solve2,
 )
 
-val STONE_REGEX = """(.+?), +(.+?), +(.+?) +@ +(.+?), +(.+?), +(.+?)""".toRegex()
+private data class Vec(val x: Long, val y: Long, val z: Long)
+
+private data class VecBuilder(val x: Long, val y: Long)
+private infix fun Long.x(that: Long) = VecBuilder(this, that)
+private infix fun VecBuilder.x(that: Long) = Vec(this.x, this.y, that)
+
+private data class Stone(val p: Vec, val v: Vec)
 
 private fun solve1(input: List<String>): Long {
 
-    data class Stone(val pos: Pair<Long, Long>, val vel: Pair<Long, Long>)
-
     fun intersectXY(a: Stone, b: Stone): Triple<Pair<Double, Double>, Double, Double>? {
-        val apx = a.pos.first
-        val apy = a.pos.second
-        val avx = a.vel.first
-        val avy = a.vel.second
-        val bpx = b.pos.first
-        val bpy = b.pos.second
-        val bvx = b.vel.first
-        val bvy = b.vel.second
+        val apx = a.p.x
+        val apy = a.p.y
+        val avx = a.v.x
+        val avy = a.v.y
+        val bpx = b.p.x
+        val bpy = b.p.y
+        val bvx = b.v.x
+        val bvy = b.v.y
 
         val div = bvx * avy - bvy * avx
         if (div == 0L) return null
@@ -38,10 +48,7 @@ private fun solve1(input: List<String>): Long {
     val min = 200_000_000_000_000
     val max = 400_000_000_000_000
 
-    val stones = input.map {
-        val (px, py, pz, vx, vy, vz) = STONE_REGEX.matchEntire(it)!!.groupValues.drop(1).map { it.toLong() }
-        Stone(px to py, vx to vy)
-    }
+    val stones = parse(input)
 
     return (0 until stones.size).sumOf { i ->
         val si = stones[i]
@@ -57,4 +64,50 @@ private fun solve1(input: List<String>): Long {
             1L
         }
     }
+}
+
+private fun areCollinear(a: Vec, b: Vec): Boolean {
+    return a.y*b.z - a.z*b.y == 0L &&
+            a.x*b.z - a.z*b.x == 0L &&
+            a.x*b.y - a.y*b.x == 0L;
+}
+
+private fun solve2(input: List<String>): Long {
+    val stones = parse(input)
+
+    // No interest to solve algebra myself.
+    val z3PythonScript = Files.createTempFile("aoc", ".py")
+    z3PythonScript.writeLines(sequence {
+        yield("from z3 import *")
+        yield("px,py,pz,vx,vy,vz = Reals('px py pz vx vy vz')")
+        yield("t1,t2,t3,t4 = Reals('t1 t2 t3 t4')")
+        yield("s = Solver()")
+        yield("s.add(")
+        for ((idx, s) in stones.take(4).withIndex()) {
+            val t = "t${idx + 1}"
+            yield("${s.p.x} + (${s.v.x}) * $t == px + vx * $t ,")
+            yield("${s.p.y} + (${s.v.y}) * $t == py + vy * $t ,")
+            yield("${s.p.z} + (${s.v.z}) * $t == pz + vz * $t ,")
+        }
+        yield(")")
+        yield("s.check()")
+        yield("m = s.model()")
+        yield("print(m[px].as_long() + m[py].as_long() + m[pz].as_long())")
+        yield("exit()")
+    })
+    val output = Files.createTempFile("aoc", ".txt")
+
+    val pb = ProcessBuilder("/opt/homebrew/bin/python3", z3PythonScript.pathString).redirectOutput(output.toFile())
+    val p = pb.start().waitFor(5, TimeUnit.SECONDS)
+    return output.readText().trim().toLong()
+}
+
+private val STONE_REGEX = """(.+?), +(.+?), +(.+?) +@ +(.+?), +(.+?), +(.+?)""".toRegex()
+
+private fun parse(input: List<String>): List<Stone> {
+    val stones = input.map {
+        val (px, py, pz, vx, vy, vz) = STONE_REGEX.matchEntire(it)!!.groupValues.drop(1).map { it.toLong() }
+        Stone(px x py x pz, vx x vy x vz)
+    }
+    return stones
 }

@@ -1,12 +1,14 @@
 package utils
 
 import java.io.File
+import java.io.FileNotFoundException
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.streams.asSequence
 import kotlin.time.measureTimedValue
 
 /**
@@ -47,17 +49,31 @@ fun <T> List<T>.split(separator: T): Sequence<Sequence<T>> = sequence {
 @Deprecated("just don't use it")
 fun Any?.println() = println(this)
 
+private val MAIN_CLASS_PATTERN = Regex("""(?:.*)Day(?:\d+)(?:Kt)?""")
 private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part(\d)(?:\b|_).*""")
 
 fun test(vararg parts: (List<String>) -> Any) {
-    val className = Throwable().stackTrace
-        .map { it.className }
-        .dropWhile { !it.startsWith("Day") || !it.endsWith("Kt") }
-        .first()
-    val day = className.substringBefore("Kt")
+    // className = year2023.Day10
+    val className = StackWalker.getInstance().walk { frames ->
+        frames.asSequence()
+            .map { it.className }
+            .firstOrNull { MAIN_CLASS_PATTERN.matches(it) }
+            ?.substringBefore("Kt")
+            ?: throw IllegalCallerException("this function should be called from DayNN class")
+    }
+    // year = year2023.
+    val year = className.substringBeforeLast("Day")
+    // day = Day10
+    val day = "Day" + className.substringAfterLast("Day")
 
+    val inputsDir = "src/${year.replace('.', '/')}"
     val inputFiles =
-        File("src/").listFiles { _, name -> name.startsWith(day) && name.endsWith(".txt") } ?: arrayOf()
+        File(inputsDir)
+            .listFiles { _, name ->
+                name.startsWith(day) && name.endsWith(".txt") }
+    if (inputFiles.isNullOrEmpty()) {
+        throw FileNotFoundException("no input files")
+    }
 
     for ((i, p) in parts.withIndex()) {
         for (f in inputFiles.sortedBy { it.length() }) {

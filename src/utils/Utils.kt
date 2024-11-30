@@ -1,11 +1,14 @@
 package utils
 
 import java.io.File
-import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.math.BigInteger
+import java.net.HttpURLConnection
+import java.net.URI
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
+import kotlin.io.path.readText
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.streams.asSequence
@@ -61,8 +64,8 @@ fun test(vararg parts: (List<String>) -> Any) {
             ?.substringBefore("Kt")
             ?: throw IllegalCallerException("this function should be called from DayNN class")
     }
-    // year = year2023.
-    val year = className.substringBeforeLast("Day")
+    // year = year2023
+    val year = className.substringBeforeLast(".Day")
     // day = Day10
     val day = "Day" + className.substringAfterLast("Day")
 
@@ -71,17 +74,29 @@ fun test(vararg parts: (List<String>) -> Any) {
         File(inputsDir)
             .listFiles { _, name ->
                 name.startsWith(day) && name.endsWith(".txt") }
-    if (inputFiles.isNullOrEmpty()) {
-        throw FileNotFoundException("no input files")
+            ?: emptyArray()
+
+    val inputs =
+        inputFiles.sortedBy { it.length() }
+            .map { f ->
+                val kind = f.nameWithoutExtension
+                    .substringAfter(day).substringAfter('_')
+                    .takeIf { it.isNotEmpty() } ?: "real"
+                kind to f
+            }
+            .toMutableList()
+
+    if (!inputs.any { it.first == "real" }) {
+        inputs += "real" to downloadRealInput(
+            year.substringAfter("year").toInt(),
+            day.substringAfter("Day").toInt(),
+            "$inputsDir/$day.txt"
+        )
     }
 
     for ((i, p) in parts.withIndex()) {
-        for (f in inputFiles.sortedBy { it.length() }) {
-            val partNum = i + 1
-            val kind = f.nameWithoutExtension
-                .substringAfter(day).substringAfter('_')
-                .takeIf { it.isNotEmpty() } ?: "real"
-
+        val partNum = i + 1
+        for ((kind, f) in inputs) {
             val partNumMatch = PART_NUM_PATTERN.matchEntire(kind)
             if (partNumMatch != null && partNumMatch.groupValues[1].toInt() != partNum) {
                 // Skip inputs for other parts.
@@ -98,6 +113,28 @@ fun test(vararg parts: (List<String>) -> Any) {
                         .onFailure { it.printStackTrace(System.out) }
                 }
         }
+    }
+}
+
+private fun downloadRealInput(year: Int, day: Int, outputPath: String): File {
+    val url = URI("https://adventofcode.com/$year/day/$day/input").toURL()
+    try {
+        val connection = url.openConnection() as HttpURLConnection
+        val sessionCookie = Path(".session-cookie").readText().trim()
+        connection.setRequestProperty("Cookie", "session=$sessionCookie")
+
+        when (connection.responseCode) {
+            HttpURLConnection.HTTP_OK ->
+                connection.inputStream.use { input ->
+                    FileOutputStream(outputPath).use { output ->
+                        output.write(input.readAllBytes())
+                    }
+                    return File(outputPath)
+                }
+            else -> throw RuntimeException("Bad response: ${connection.responseCode}, ${connection.responseMessage}")
+        }
+    } catch (e: Exception) {
+        throw RuntimeException("Cannot download $url", e)
     }
 }
 

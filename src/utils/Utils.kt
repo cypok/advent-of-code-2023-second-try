@@ -52,7 +52,7 @@ fun <T> List<T>.split(separator: T): Sequence<Sequence<T>> = sequence {
 @Deprecated("just don't use it")
 fun Any?.println() = println(this)
 
-private val MAIN_CLASS_PATTERN = Regex("""(?:.*)Day(?:\d+)(?:Kt)?""")
+private val MAIN_CLASS_PATTERN = Regex(""".*Day\d+(?:Kt)?""")
 private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part(\d)(?:\b|_).*""")
 
 fun test(vararg parts: (List<String>) -> Any) {

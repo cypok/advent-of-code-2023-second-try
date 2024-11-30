@@ -6,12 +6,12 @@ data class Point(val row: Int, val col: Int) {
 
     override fun toString(): String = "${row}x${col}"
 
-    fun moveInDir(dir: Dir): Point =
+    fun moveInDir(dir: Dir, steps: Int = 1): Point =
         when (dir) {
-            Dir.UP -> (row - 1) x col
-            Dir.DOWN -> (row + 1) x col
-            Dir.LEFT -> row x (col - 1)
-            Dir.RIGHT -> row x (col + 1)
+            Dir.UP -> (row - steps) x col
+            Dir.DOWN -> (row + steps) x col
+            Dir.LEFT -> row x (col - steps)
+            Dir.RIGHT -> row x (col + steps)
         }
 }
 

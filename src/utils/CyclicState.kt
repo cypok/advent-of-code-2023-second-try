@@ -28,7 +28,7 @@ fun <T> Collection<CyclicState<T>>.tickAll(time: Long): Unit =
     forEach { it.tick(time) }
 
 fun <T> Collection<CyclicState<T>>.detectCommonCycle(): Long? =
-    fold(1) { c, s ->
+    fold(1L as Long?) { c, s ->
         if (c == null) {
             null
         } else {

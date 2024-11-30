@@ -122,6 +122,7 @@ private fun downloadRealInput(year: Int, day: Int, outputPath: String): File {
         val connection = url.openConnection() as HttpURLConnection
         val sessionCookie = Path(".session-cookie").readText().trim()
         connection.setRequestProperty("Cookie", "session=$sessionCookie")
+        connection.setRequestProperty("User-Agent", "github.com/cypok/advent-of-code by @cypok")
 
         when (connection.responseCode) {
             HttpURLConnection.HTTP_OK ->

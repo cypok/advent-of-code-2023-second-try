@@ -15,11 +15,6 @@ import kotlin.streams.asSequence
 import kotlin.time.measureTimedValue
 
 /**
- * Reads lines from the given input txt file.
- */
-fun readInput(name: String) = Path("src/$name.txt").readLines()
-
-/**
  * Converts string to md5 hash.
  */
 @Suppress("unused")
@@ -45,12 +40,6 @@ fun <T> List<T>.split(separator: T): Sequence<Sequence<T>> = sequence {
         })
     }
 }
-
-/**
- * The cleaner shorthand for printing output.
- */
-@Deprecated("just don't use it")
-fun Any?.println() = println(this)
 
 private val MAIN_CLASS_PATTERN = Regex(""".*Day\d+(?:Kt)?""")
 private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part(\d)(?:\b|_).*""")

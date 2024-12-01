@@ -3,8 +3,8 @@ package year2023
 import utils.*
 
 fun main() = test(
-    { year2023.solve(it, 1) },
-    { year2023.solve(it, 5) },
+    { solve(it, 1) },
+    { solve(it, 5) },
 )
 
 private fun <T> expand(xs: Iterable<T>, expansion: Int, separator: T?): LList<T>? =
@@ -15,10 +15,10 @@ private fun <T> expand(xs: Iterable<T>, expansion: Int, separator: T?): LList<T>
 
 private fun solve(input: List<String>, expansion: Int): Long {
     return input.sumOf { line ->
-        val pattern = year2023.expand(line.substringBefore(' ').asIterable(), expansion, '?')
-        val groups = year2023.expand(line.substringAfter(' ').split(',').map { it.toInt() }, expansion, null)
+        val pattern = expand(line.substringBefore(' ').asIterable(), expansion, '?')
+        val groups = expand(line.substringAfter(' ').split(',').map { it.toInt() }, expansion, null)
 
-        year2023.countVariants(mutableMapOf(), year2023.skipSpaces(pattern), null, groups)
+        countVariants(mutableMapOf(), skipSpaces(pattern), null, groups)
     }
 }
 
@@ -26,14 +26,14 @@ private fun <A, R> memoize(cache: MutableMap<A, R>, args: A, calcFunc: () -> R):
     cache.getOrPut(args) { calcFunc() }
 
 private tailrec fun skipSpaces(pattern: LList<Char>?): LList<Char>? =
-    if (pattern == null || pattern.head != '.') pattern else year2023.skipSpaces(pattern.tail)
+    if (pattern == null || pattern.head != '.') pattern else skipSpaces(pattern.tail)
 
 private fun countVariants(
     cache: MutableMap<Any, Long>,
     pattern: LList<Char>?, curGroupRemaining: Int?, groups: LList<Int>?
 ): Long =
-    year2023.memoize(cache, Triple(pattern, curGroupRemaining, groups)) {
-        assert(year2023.skipSpaces(pattern) == pattern)
+    memoize(cache, Triple(pattern, curGroupRemaining, groups)) {
+        assert(skipSpaces(pattern) == pattern)
         if (pattern == null) {
             // recursion termination case
             if (groups == null && (curGroupRemaining == null || curGroupRemaining == 0)) {
@@ -47,7 +47,7 @@ private fun countVariants(
                 // . must be the next char.
                 when (pattern.head) {
                     '#' -> 0L
-                    '.', '?' -> year2023.countVariants(cache, year2023.skipSpaces(pattern.tail), null, groups)
+                    '.', '?' -> countVariants(cache, skipSpaces(pattern.tail), null, groups)
                     else -> throw IllegalStateException()
                 }
             } else {
@@ -55,7 +55,7 @@ private fun countVariants(
                 // # must be the next char.
                 when (pattern.head) {
                     '.' -> 0L
-                    '#', '?' -> year2023.countVariants(cache, pattern.tail, curGroupRemaining - 1, groups)
+                    '#', '?' -> countVariants(cache, pattern.tail, curGroupRemaining - 1, groups)
                     else -> throw IllegalStateException()
                 }
             }
@@ -63,13 +63,13 @@ private fun countVariants(
             // non-trivial recursion case, when we have to try both values for the next character
             fun countAsHashStart() =
                 if (groups == null) 0
-                else year2023.countVariants(cache, pattern.tail, groups.head - 1, groups.tail)
+                else countVariants(cache, pattern.tail, groups.head - 1, groups.tail)
 
             when (pattern.head) {
                 '#' -> countAsHashStart()
                 '?' -> {
                     val asHash = countAsHashStart()
-                    val asSpace = year2023.countVariants(cache, year2023.skipSpaces(pattern.tail), null, groups)
+                    val asSpace = countVariants(cache, skipSpaces(pattern.tail), null, groups)
                     asHash + asSpace
                 }
 

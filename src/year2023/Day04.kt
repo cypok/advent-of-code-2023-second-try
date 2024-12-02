@@ -10,7 +10,7 @@ fun main() = test(
 private fun processOneCard(line: String): Int {
     // line example:
     // Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
-    val nums = line.split(Regex(" +")).asSequence()
+    val nums = line.words().asSequence()
     val winning = nums.drop(2).takeWhile { it != "|" }.toSet()
     return nums.dropWhile { it != "|" }.drop(1).count { it in winning }
 }

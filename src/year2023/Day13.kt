@@ -8,7 +8,7 @@ fun main() = test(
 )
 
 private fun solve(input: List<String>, expectedSmudgesCount: Int): Long {
-    return input.split("").sumOf { map ->
+    return input.splitByEmptyLines().sumOf { map ->
         when (val ref = solveOne(StringArray2D(map.toList()), expectedSmudgesCount)) {
             is Reflection.Vertical -> ref.col
             is Reflection.Horizontal -> ref.row * 100

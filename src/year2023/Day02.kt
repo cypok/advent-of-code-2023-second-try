@@ -21,9 +21,9 @@ private fun solve1(input: List<String>): Int {
         val sets = match.groupValues[2]
         val isPossible = sets.splitToSequence("; ").all { set ->
             set.splitToSequence(", ").all { group ->
-                val numAndColor = group.split(" ")
-                val num = numAndColor[0].toInt()
-                when (numAndColor[1]) {
+                val (numStr, colorStr) = group.words()
+                val num = numStr.toInt()
+                when (colorStr) {
                     "red" -> num <= 12
                     "green" -> num <= 13
                     "blue" -> num <= 14
@@ -40,9 +40,9 @@ private fun solve2(input: List<String>): Int {
         val sets = line.substringAfter(": ")
         val res = sets.splitToSequence("; ").fold(RGB(0, 0, 0)) { acc, set ->
             set.splitToSequence(", ").fold(acc) { acc, group ->
-                val numAndColor = group.split(" ")
-                val num = numAndColor[0].toInt()
-                when (numAndColor[1]) {
+                val (numStr, colorStr) = group.words()
+                val num = numStr.toInt()
+                when (colorStr) {
                     "red"   -> acc.copy(red   = max(acc.red,   num))
                     "green" -> acc.copy(green = max(acc.green, num))
                     "blue"  -> acc.copy(blue  = max(acc.blue,  num))

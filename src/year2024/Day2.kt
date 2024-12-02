@@ -13,7 +13,7 @@ fun main() = test(
 
 private fun solve(input: List<String>, allowCorrection: Boolean): Int =
     input.count { line ->
-        val xs = line.split(" ").map { it.toInt() }
+        val xs = line.numbers()
         return@count isSafe(xs) ||
                 allowCorrection && xs.indices.any { i ->
                     val xsWithoutOne = xs.toMutableList()
@@ -22,17 +22,15 @@ private fun solve(input: List<String>, allowCorrection: Boolean): Int =
                 }
     }
 
-private fun isSafe(xs: List<Int>): Boolean {
-    var lastDelta: Int? = null
+private fun isSafe(xs: List<Long>): Boolean {
+    var lastDelta: Long? = null
     for ((x, y) in xs.windowed(2)) {
         val newDelta = y - x
         if (newDelta.absoluteValue !in 1..3) {
             return false
         }
-        if (lastDelta != null) {
-            if (lastDelta * newDelta < 0) {
-                return false
-            }
+        if (lastDelta != null && lastDelta * newDelta < 0) {
+            return false
         }
         lastDelta = newDelta
     }

@@ -81,7 +81,7 @@ private fun process(input: List<String>, withJoker: Boolean): Long {
     }
 
     return input.map {
-        val (hand, score) = it.split(' ')
+        val (hand, score) = it.words()
         HandInfo(hand, detectType(hand), labelsStrength(hand), score.toLong())
     }
         .sorted()

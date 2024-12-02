@@ -14,7 +14,7 @@ private fun solve(input: List<String>, combine: (List<Long>, Long) -> Long): Lon
         return combine(seq, step)
     }
     return input.sumOf { line ->
-        extrapolate(line.split(' ').map { it.toLong() })
+        extrapolate(line.numbers())
     }
 }
 

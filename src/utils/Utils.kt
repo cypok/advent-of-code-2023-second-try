@@ -41,6 +41,15 @@ fun <T> List<T>.split(separator: T): Sequence<Sequence<T>> = sequence {
     }
 }
 
+fun List<String>.splitByEmptyLines(): Sequence<Sequence<String>> =
+    split("")
+
+fun String.words(): List<String> =
+    split("""\s+""".toRegex())
+
+fun String.numbers(): List<Long> =
+    words().map { it.toLong() }
+
 private val MAIN_CLASS_PATTERN = Regex(""".*Day\d+(?:Kt)?""")
 private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part(\d)(?:\b|_).*""")
 

@@ -41,7 +41,7 @@ private fun processSeeds(input: List<String>, seedRanges: List<LongRange>): Long
             val line = remaining.next()
             if (line.isEmpty()) break
 
-            val (dst, src, count) = line.split(' ').map { it.toLong() }
+            val (dst, src, count) = line.numbers()
             var i = 0
             while (i < prevIdRanges.size) {
                 val idRange = prevIdRanges[i]
@@ -130,7 +130,7 @@ private fun processSeeds(input: List<String>, seedRanges: List<LongRange>): Long
 private fun solve1(input: List<String>): Long {
     val seeds = input[0]
         .substringAfter("seeds: ")
-        .split(' ')
+        .words()
         .map { rangeByFirstAndCount(it.toLong(), 1) }
 
     return processSeeds(input, seeds)
@@ -139,8 +139,7 @@ private fun solve1(input: List<String>): Long {
 private fun solve2(input: List<String>): Long {
     val seeds = input[0]
         .substringAfter("seeds: ")
-        .split(' ')
-        .map { it.toLong() }
+        .numbers()
         .chunked(2)
         .map { (start, count) -> rangeByFirstAndCount(start, count) }
 

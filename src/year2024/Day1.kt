@@ -1,13 +1,8 @@
 package year2024
 
-import utils.*
-import kotlin.collections.map
-import kotlin.collections.unzip
+import utils.numbers
+import utils.test
 import kotlin.math.absoluteValue
-import kotlin.text.Regex
-import kotlin.text.split
-import kotlin.text.toInt
-import kotlin.to
 
 // Task description:
 //   https://adventofcode.com/2024/day/1
@@ -30,6 +25,5 @@ private fun solve2(input: List<String>): Long {
 
 private fun parse(input: List<String>) =
     input
-        .map { it.split(Regex(" +")) }
-        .map { it[0].toInt() to it[1].toInt() }
+        .map { it.numbers().let { (a, b) -> a to b } }
         .unzip()

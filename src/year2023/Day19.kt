@@ -117,7 +117,7 @@ private fun solve2(input: List<String>): Long {
 }
 
 private fun parse(input: List<String>): Pair<Map<String, Rule>, List<Part>> {
-    val (ruleStrs, partStrs) = input.split("").map { it.toList() }.toList()
+    val (ruleStrs, partStrs) = input.splitByEmptyLines().map { it.toList() }.toList()
 
     val ruleRegex = """(.+)\{(.+)\}""".toRegex()
     val condCmdRegex = """(.)([<>])(\d+):(.+)""".toRegex()

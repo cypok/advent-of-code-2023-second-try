@@ -45,7 +45,7 @@ private class Graph(input: List<String>) {
     init {
         val parsed = input.map {
             val src = it.substringBefore(": ")
-            val dsts = it.substringAfter(": ").split(' ')
+            val dsts = it.substringAfter(": ").words()
             Pair(src, dsts)
         }
         nodes = buildSet<String> {

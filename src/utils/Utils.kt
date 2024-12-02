@@ -152,6 +152,9 @@ fun <T> Collection<Iterable<T>>.cartesianProduct(): List<List<T>> {
     return first().flatMap { head -> tails.map { tail -> listOf(head) + tail } }
 }
 
+fun <T> Collection<T>.cycle(): Sequence<T> =
+    generateSequence { this }.flatten()
+
 fun gcd(x: Long, y: Long): Long {
     var a = max(x, y)
     var b = min(x, y)

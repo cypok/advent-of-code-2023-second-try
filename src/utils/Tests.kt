@@ -3,6 +3,7 @@ package utils
 fun main() {
     testCartesianProduct()
     testGcdLcm()
+    testCycle()
 }
 
 private fun testCartesianProduct() {
@@ -20,4 +21,8 @@ private fun testGcdLcm() {
     check(1L == gcd(1, 37))
     check(37L == lcm(37, 1))
     check(37L == lcm(1, 37))
+}
+
+private fun testCycle() {
+    check(listOf(1, 2, 3, 1, 2, 3, 1) == listOf(1, 2, 3).cycle().take(7).toList())
 }

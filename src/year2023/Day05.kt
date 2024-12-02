@@ -51,10 +51,10 @@ private fun processSeeds(input: List<String>, seedRanges: List<LongRange>): Long
                 val kept = mutableListOf<LongRange>()
                 fun keep(part: LongRange) = kept.add(part)
 
-                var toMoveHolder: LongRange? = null
+                var toMove: LongRange? = null
                 fun move(part: LongRange) {
-                    assert(toMoveHolder == null)
-                    toMoveHolder = part
+                    assert(toMove == null)
+                    toMove = part
                 }
 
                 if (srcRange.last < idRange.first || idRange.last < srcRange.first) {
@@ -104,8 +104,7 @@ private fun processSeeds(input: List<String>, seedRanges: List<LongRange>): Long
                     ))
                 }
 
-                if (toMoveHolder != null) {
-                    val toMove = toMoveHolder!!
+                if (toMove != null) {
                     assert(kept.all { !it.isEmpty() })
                     assert(!toMove.isEmpty())
                     assert(kept.sumOf { it.count() } + toMove.count() == idRange.count())

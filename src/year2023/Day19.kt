@@ -119,7 +119,7 @@ private fun solve2(input: List<String>): Long {
 private fun parse(input: List<String>): Pair<Map<String, Rule>, List<Part>> {
     val (ruleStrs, partStrs) = input.splitByEmptyLines().map { it.toList() }.toList()
 
-    val ruleRegex = """(.+)\{(.+)\}""".toRegex()
+    val ruleRegex = """(.+)\{(.+)}""".toRegex()
     val condCmdRegex = """(.)([<>])(\d+):(.+)""".toRegex()
     val rules = ruleStrs.associate { ruleStr ->
         val (name, cmdStrs) = ruleRegex.matchEntire(ruleStr)!!.destructured
@@ -135,7 +135,7 @@ private fun parse(input: List<String>): Pair<Map<String, Rule>, List<Part>> {
         name to Rule(name, cmds)
     }
 
-    val partRegex = """\{(.+)\}""".toRegex()
+    val partRegex = """\{(.+)}""".toRegex()
     val partComponentRegex = """(.)=(\d+)""".toRegex()
     val parts: List<Part> = partStrs.map { partStr ->
         partRegex.matchEntire(partStr)!!.groupValues[1].split(",").associate { compStr ->

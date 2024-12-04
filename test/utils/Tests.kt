@@ -30,4 +30,40 @@ class Tests {
         assertEquals(listOf(1, 2, 3, 1, 2, 3, 1), listOf(1, 2, 3).cycle().take(7).toList())
     }
 
+    @Test
+    fun testStringArray2DWide() {
+        val map = StringArray2D( """
+            abcd
+            efgh
+        """.trimIndent().lines())
+        assertEquals(listOf("abcd", "efgh"), map.rows.map { it.asString() })
+        assertEquals(listOf("ae", "bf", "cg", "dh"), map.cols.map { it.asString() })
+
+        assertEquals(listOf("e", "af", "bg", "ch", "d"), map.diagonalsRight.map { it.asString() })
+        assertEquals(listOf("a", "be", "cf", "dg", "h"), map.diagonalsLeft.map { it.asString() })
+    }
+
+    @Test
+    fun testStringArray2DNarrow() {
+        val map = StringArray2D("""
+            ae
+            bf
+            cg
+            dh
+        """.trimIndent().lines())
+        assertEquals(listOf("d", "ch", "bg", "af", "e"), map.diagonalsRight.map { it.asString() })
+        assertEquals(listOf("a", "eb", "fc", "gd", "h"), map.diagonalsLeft.map { it.asString() })
+    }
+
+    @Test
+    fun testStringArray2DDiagonalsBig() {
+        val map = StringArray2D("""
+            abcd
+            efgh
+            ijkl
+        """.trimIndent().lines())
+        assertEquals(listOf("i", "ej", "afk", "bgl", "ch", "d"), map.diagonalsRight.map { it.asString() })
+        assertEquals(listOf("a", "be", "cfi", "dgj", "hk", "l"), map.diagonalsLeft.map { it.asString() })
+    }
+
 }

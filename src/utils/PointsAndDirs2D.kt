@@ -1,5 +1,8 @@
 package utils
 
+import kotlin.math.max
+import kotlin.math.min
+
 data class Point(val row: Int, val col: Int) {
     val i get() = row
     val j get() = col
@@ -91,6 +94,28 @@ class StringArray2D(private val strings: List<String>) {
             override val size: Int get() = height
             override fun get(index: Int): Char = get(index, col)
         }
+
+    val diagonalsRight: List<List<Char>>
+        get() = buildList {
+            // It could be done easier by just checking out of bounds access,
+            // but I wanted to practice some math.
+            // And it also could be done without any array allocations like rows above,
+            // but it requires even more math.
+            for (j in -height+1 ..< width) {
+                val iMin = max(0, -j)
+                val iMax = min(height-1, -j+width-1)
+                add((iMin..iMax).map { i -> get(i, j + i) })
+            }
+        }
+
+    val diagonalsLeft: List<List<Char>>
+        get() = buildList {
+            for (j in 0 ..< width+height-1) {
+                val iMin = max(0, j-width+1)
+                val iMax = min(height-1, j)
+                add((iMin..iMax).map { i -> get(i, j - i) })
+            }
+        }
 }
 
 operator fun <T> Array<Array<T>>.get(i: Int, j: Int): T = this[i][j]
@@ -98,3 +123,6 @@ operator fun <T> Array<Array<T>>.set(i: Int, j: Int, v: T) { this[i][j] = v }
 operator fun <T> Array<Array<T>>.get(pos: Point): T = this[pos.i][pos.j]
 operator fun <T> Array<Array<T>>.set(pos: Point, v: T) { this[pos.i][pos.j] = v }
 fun <T> Array<Array<T>>.getOrNull(pos: Point): T? = this.getOrNull(pos.i)?.getOrNull(pos.j)
+
+fun List<Char>.asString(): String =
+    String(toCharArray())

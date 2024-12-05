@@ -16,7 +16,7 @@ private fun <T> expand(xs: Iterable<T>, expansion: Int, separator: T?): LList<T>
 private fun solve(input: List<String>, expansion: Int): Long {
     return input.sumOf { line ->
         val pattern = expand(line.substringBefore(' ').asIterable(), expansion, '?')
-        val groups = expand(line.substringAfter(' ').split(',').map { it.toInt() }, expansion, null)
+        val groups = expand(line.substringAfter(' ').numbersAsInts(), expansion, null)
 
         countVariants(mutableMapOf(), skipSpaces(pattern), null, groups)
     }

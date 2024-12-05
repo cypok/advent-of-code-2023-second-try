@@ -48,7 +48,10 @@ fun String.words(): List<String> =
     split("""\s+""".toRegex())
 
 fun String.numbers(): List<Long> =
-    words().map { it.toLong() }
+    split("""[^0-9+-]+""".toRegex()).filterNot { it.isEmpty() }.map { it.toLong() }
+
+fun String.numbersAsInts(): List<Int> =
+    numbers().map { it.toIntExact() }
 
 private val MAIN_CLASS_PATTERN = Regex(""".*Day\d+(?:Kt)?""")
 private val PART_NUM_PATTERN = Regex(""".*(?:\b|_)part(\d)(?:\b|_).*""")

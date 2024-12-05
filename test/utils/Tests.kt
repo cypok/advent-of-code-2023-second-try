@@ -74,4 +74,13 @@ class Tests {
         assertEquals(listOf(listOf(1, 2, 3), listOf(4, 5, 6), listOf(7, 8, 9)), xxs.toList())
     }
 
+    @Test
+    fun testParsingUtils() {
+        assertEquals(listOf("abc", "def"), "abc   def".words())
+
+        assertEquals(listOf(37L, -42L), "37   -42".numbers())
+        assertEquals(listOf(37L, -42L), " 37   -42 ".numbers())
+        assertEquals(listOf(37L, -42L), "37,-42".numbers())
+    }
+
 }

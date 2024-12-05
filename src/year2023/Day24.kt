@@ -105,11 +105,9 @@ private fun solve2(input: List<String>): Long {
     return output.readText().trim().toLong()
 }
 
-private val STONE_REGEX = """(.+?), +(.+?), +(.+?) +@ +(.+?), +(.+?), +(.+?)""".toRegex()
-
 private fun parse(input: List<String>): List<Stone> {
     val stones = input.map {
-        val (px, py, pz, vx, vy, vz) = STONE_REGEX.matchEntire(it)!!.groupValues.drop(1).map { it.toLong() }
+        val (px, py, pz, vx, vy, vz) = it.numbers()
         Stone(px x py x pz, vx x vy x vz)
     }
     return stones

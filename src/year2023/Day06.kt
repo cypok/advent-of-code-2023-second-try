@@ -14,9 +14,7 @@ private fun process(races: List<Pair<Long, Long>>): Long {
 }
 
 private fun part1(input: List<String>): Long {
-    val (times, distances) = input.map {
-        it.words().drop(1).map { it.toLong() }
-    }
+    val (times, distances) = input.map { it.numbers() }
     return process(times zip distances)
 }
 

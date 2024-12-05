@@ -14,11 +14,11 @@ fun main() = test(
 private fun solve(input: List<String>, fixing: Boolean): Long {
     val (rulesLines, updates) = input.splitByEmptyLines().toList()
     val rules = rulesLines.map {
-        it.split("|").map { it.toInt() }.let { (a, b) -> a to b }
+        it.numbers().let { (a, b) -> a to b }
     }.toSet()
 
     return updates.sumOf { update ->
-        val pages = update.split(",").map { it.toInt() }
+        val pages = update.numbers()
         val right = isRightOrder(pages, rules)
         if (fixing) {
             if (right) {
@@ -36,7 +36,7 @@ private fun solve(input: List<String>, fixing: Boolean): Long {
     }
 }
 
-private fun isRightOrder(pages: List<Int>, rules: Set<Pair<Int, Int>>): Boolean {
+private fun isRightOrder(pages: List<Long>, rules: Set<Pair<Long, Long>>): Boolean {
     for (i in 0..<pages.size) {
         for (j in i+1..<pages.size) {
             if ((pages[j] to pages[i]) in rules) {
@@ -47,8 +47,8 @@ private fun isRightOrder(pages: List<Int>, rules: Set<Pair<Int, Int>>): Boolean 
     return true
 }
 
-private fun comparatorByRules(rules: Set<Pair<Int, Int>>) =
-    Comparator<Int> { x, y ->
+private fun comparatorByRules(rules: Set<Pair<Long, Long>>) =
+    Comparator<Long> { x, y ->
         if ((x to y) in rules) {
             -1
         } else if ((y to x) in rules) {

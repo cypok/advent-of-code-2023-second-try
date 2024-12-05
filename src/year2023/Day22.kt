@@ -46,14 +46,9 @@ private data class Brick(val name: String, val p1: P, val p2: P) {
     }
 }
 
-private val BRICK_REGEX = """(\d+),(\d+),(\d+)~(\d+),(\d+),(\d+)""".toRegex()
-
 private fun settleAndFindSupports(input: List<String>): Pair<MutableList<Brick>, Map<Brick, List<Brick>>> {
     val bricks = input.mapIndexed { idx, line ->
-        val (x1, y1, z1, x2, y2, z2) = BRICK_REGEX.matchEntire(line)!!
-            .groupValues
-            .drop(1)
-            .map { it.toInt() }
+        val (x1, y1, z1, x2, y2, z2) = line.numbersAsInts()
         check(x1 <= x2 && y1 <= y2 && z1 <= z2)
         Brick(idx.toString(), P(x1, y1, z1), P(x2, y2, z2))
     }.sortedBy { it.bottom }

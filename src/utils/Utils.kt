@@ -26,22 +26,22 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
 inline fun <T> Iterable<T>.productOf(selector: (T) -> Long): Long =
     fold(1) { acc, x -> acc * selector(x) }
 
-fun <T> List<T>.split(separator: T): Sequence<Sequence<T>> = sequence {
+fun <T> List<T>.split(separator: T): Sequence<List<T>> = sequence {
     val remaining = this@split.iterator()
     while (remaining.hasNext()) {
-        yield(sequence {
+        yield(buildList {
             while (remaining.hasNext()) {
                 val elem = remaining.next()
                 if (elem == separator) {
                     break
                 }
-                yield(elem)
+                add(elem)
             }
         })
     }
 }
 
-fun List<String>.splitByEmptyLines(): Sequence<Sequence<String>> =
+fun List<String>.splitByEmptyLines(): Sequence<List<String>> =
     split("")
 
 fun String.words(): List<String> =
@@ -174,3 +174,5 @@ inline fun <T, R> Pair<T, T>.map(transform: (T) -> R): Pair<R, R> =
     Pair(transform(first), transform(second))
 
 operator fun <T> List<T>.component6() = get(5)
+
+fun <T> List<T>.middle(): T = this[this.size/2]

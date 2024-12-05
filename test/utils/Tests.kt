@@ -66,4 +66,12 @@ class Tests {
         assertEquals(listOf("a", "be", "cfi", "dgj", "hk", "l"), map.diagonalsLeft.map { it.asString() })
     }
 
+    @Test
+    fun testListSplitHard() {
+        val xxs = listOf(1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9).split(0)
+        assertEquals(listOf(1, 2, 3), xxs.first().toList())
+        assertEquals(listOf(7, 8, 9), xxs.drop(2).first().toList())
+        assertEquals(listOf(listOf(1, 2, 3), listOf(4, 5, 6), listOf(7, 8, 9)), xxs.toList())
+    }
+
 }

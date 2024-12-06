@@ -48,7 +48,7 @@ enum class Dir {
             'D' -> DOWN
             'L' -> LEFT
             'R' -> RIGHT
-            else -> throw IllegalArgumentException(ch.toString())
+            else -> error(ch)
         }
     }
 

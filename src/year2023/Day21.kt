@@ -117,7 +117,7 @@ private fun solveInfinite(input: List<String>, totalSteps: Int): Long {
     }
 
     if (limitHitEvents.size < 5) {
-        throw IllegalStateException("not enough steps!")
+        error("not enough steps!")
     }
 
     val velocities = limitHitEvents.map { it.second }.derivative()

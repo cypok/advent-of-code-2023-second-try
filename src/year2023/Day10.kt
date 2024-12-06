@@ -19,7 +19,7 @@ private fun solve(input: List<String>): Pair<Long, Long> {
         }
     }
 
-    throw IllegalArgumentException("start not found")
+    error("start not found")
 }
 
 private val pipes = mapOf(
@@ -46,7 +46,7 @@ private fun startAt(map: StringArray2D, startRow: Int, startCol: Int): Pair<Long
         }
     }
 
-    throw IllegalStateException("no pipe connection to start is found")
+    error("no pipe connection to start is found")
 }
 
 private tailrec fun followPipes(
@@ -114,37 +114,37 @@ private fun changeStateOnBorder(pipe: Char, state: AreaState): AreaState {
             when (state) {
                 OUTSIDE -> INSIDE
                 INSIDE -> OUTSIDE
-                else -> throw IllegalStateException(state.toString())
+                else -> error(state)
             }
 
         'L' ->
             when (state) {
                 OUTSIDE -> LOWER_BORDER
                 INSIDE -> UPPER_BORDER
-                else -> throw IllegalStateException(state.toString())
+                else -> error(state)
             }
 
         'F' ->
             when (state) {
                 OUTSIDE -> UPPER_BORDER
                 INSIDE -> LOWER_BORDER
-                else -> throw IllegalStateException(state.toString())
+                else -> error(state)
             }
 
         'J' ->
             when (state) {
                 UPPER_BORDER -> INSIDE
                 LOWER_BORDER -> OUTSIDE
-                else -> throw IllegalStateException(state.toString())
+                else -> error(state)
             }
 
         '7' ->
             when (state) {
                 UPPER_BORDER -> OUTSIDE
                 LOWER_BORDER -> INSIDE
-                else -> throw IllegalStateException(state.toString())
+                else -> error(state)
             }
 
-        else -> throw IllegalStateException(pipe.toString())
+        else -> error(pipe)
     }
 }

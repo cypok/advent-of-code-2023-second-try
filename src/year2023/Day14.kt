@@ -81,8 +81,7 @@ private fun solve2(input: List<String>): Pair<Int, Long> {
         loads.tick(i.toLong())
     }
 
-    val cycle = loads.detectCycle()
-        ?: throw IllegalStateException("cycle not found")
+    val cycle = loads.detectCycle() ?: error("cycle not found")
     val realLastLoad = loads.extrapolateUntil(1_000_000_000)
 
     return Pair(cycle, realLastLoad)

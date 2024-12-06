@@ -32,7 +32,7 @@ private fun applyInstructions(
         when (dir) {
             'L' -> node.first
             'R' -> node.second
-            else -> throw IllegalStateException()
+            else -> error(dir)
         }
     }
 }
@@ -79,8 +79,7 @@ private fun part2(input: List<String>): Long {
                     }
                 }
             }
-            @Suppress("UNREACHABLE_CODE")
-            throw IllegalStateException("type checker, we cannot get here, shut up")
+            shouldNotReachHere()
         }
         .reduce(::lcm)
 }

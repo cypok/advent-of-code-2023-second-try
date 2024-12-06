@@ -70,7 +70,7 @@ private fun process(input: List<String>, withJoker: Boolean): Long {
             'Q' -> 12
             'K' -> 13
             'A' -> 14
-            else -> throw IllegalArgumentException(l.toString())
+            else -> error(l)
         }
 
     fun labelsStrength(hand: String): Long {

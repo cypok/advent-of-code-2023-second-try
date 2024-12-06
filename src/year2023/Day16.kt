@@ -65,7 +65,7 @@ private fun calculateEnergy(map: StringArray2D, startPos: Point, startDir: Dir):
                     UP, DOWN -> listOf(dir.left, dir.right)
                 }
 
-                else -> throw IllegalStateException()
+                else -> error(elem)
             }
 
         if (dirs.size == 2) {

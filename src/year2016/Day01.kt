@@ -23,7 +23,7 @@ private fun solve2(input: List<String>): Int {
             return pos.i.absoluteValue + pos.j.absoluteValue
         }
     }
-    error("should not reach here")
+    shouldNotReachHere()
 }
 
 private fun getMovement(input: List<String>): Sequence<Point> = sequence {

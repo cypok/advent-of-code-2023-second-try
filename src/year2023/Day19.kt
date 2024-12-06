@@ -37,7 +37,7 @@ private sealed class Command {
             return when (condition) {
                 '<' -> actualValue < value
                 '>' -> actualValue > value
-                else -> throw IllegalStateException(this.toString())
+                else -> error(this)
             }
         }
 
@@ -46,7 +46,7 @@ private sealed class Command {
             val posAndNeg = when (condition) {
                 '<' -> listOf(IntRange(MIN_VALUE, value - 1), IntRange(value, MAX_VALUE))
                 '>' -> listOf(IntRange(value + 1, MAX_VALUE), IntRange(MIN_VALUE, value))
-                else -> throw IllegalStateException(this.toString())
+                else -> error(this)
             }
             val (pos, neg) = posAndNeg.map { filtered ->
                 (p + (checkedComponent to (filtered intersect actualRange))).validOrNull

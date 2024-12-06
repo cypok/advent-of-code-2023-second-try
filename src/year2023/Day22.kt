@@ -16,7 +16,7 @@ private data class P(val x: Int, val y: Int, val z: Int) {
         0 -> x
         1 -> y
         2 -> z
-        else -> throw NoSuchElementException()
+        else -> error(coordIdx)
     }
 
     companion object {

@@ -48,7 +48,7 @@ private fun countVariants(
                 when (pattern.head) {
                     '#' -> 0L
                     '.', '?' -> countVariants(cache, skipSpaces(pattern.tail), null, groups)
-                    else -> throw IllegalStateException()
+                    else -> shouldNotReachHere()
                 }
             } else {
                 assert(curGroupRemaining > 0)
@@ -56,7 +56,7 @@ private fun countVariants(
                 when (pattern.head) {
                     '.' -> 0L
                     '#', '?' -> countVariants(cache, pattern.tail, curGroupRemaining - 1, groups)
-                    else -> throw IllegalStateException()
+                    else -> shouldNotReachHere()
                 }
             }
         } else {
@@ -73,8 +73,8 @@ private fun countVariants(
                     asHash + asSpace
                 }
 
-                '.' -> throw AssertionError()
-                else -> throw IllegalStateException()
+                '.' -> shouldNotReachHere()
+                else -> shouldNotReachHere()
             }
         }
     }

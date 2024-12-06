@@ -63,7 +63,7 @@ fun test(vararg parts: (List<String>) -> Any) {
             .map { it.className }
             .firstOrNull { MAIN_CLASS_PATTERN.matches(it) }
             ?.substringBefore("Kt")
-            ?: throw IllegalCallerException("this function should be called from DayNN class")
+            ?: error("this function should be called from DayNN class")
     }
     // year = year2023
     val year = className.substringBeforeLast(".Day")
@@ -179,3 +179,5 @@ inline fun <T, R> Pair<T, T>.map(transform: (T) -> R): Pair<R, R> =
 operator fun <T> List<T>.component6() = get(5)
 
 fun <T> List<T>.middle(): T = this[this.size/2]
+
+fun shouldNotReachHere(): Nothing = error("should not reach here")

@@ -39,7 +39,7 @@ private fun solve2(input: List<String>): Long {
             "-" -> {
                 lenses.removeIf { it.first == label }
             }
-            else -> throw IllegalArgumentException(step)
+            else -> error(step)
         }
     }
     return boxes.withIndex().sumOf { (boxIdx, lenses) ->

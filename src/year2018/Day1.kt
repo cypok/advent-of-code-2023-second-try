@@ -22,5 +22,5 @@ private fun solve2(input: List<String>): Long {
             return cur
         }
     }
-    error("should not reach here")
+    shouldNotReachHere()
 }

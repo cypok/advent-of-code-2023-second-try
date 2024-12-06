@@ -29,7 +29,7 @@ private fun solveOne(map: StringArray2D, expectedSmudgesCount: Int): Reflection 
 
     return tryDimension(map.width, map.rows)?.let { Reflection.Vertical(it) } ?:
            tryDimension(map.height, map.cols)?.let { Reflection.Horizontal(it) } ?:
-           throw IllegalArgumentException()
+           shouldNotReachHere()
 }
 
 private fun countSmudges(row: List<Char>, colNum: Int): Int {

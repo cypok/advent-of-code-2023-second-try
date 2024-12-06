@@ -30,7 +30,7 @@ private fun solve(input: List<String>): Long {
         }
     }
 
-    throw IllegalStateException()
+    shouldNotReachHere()
 }
 
 private class Graph(input: List<String>) {

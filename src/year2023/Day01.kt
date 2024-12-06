@@ -40,7 +40,7 @@ private fun solve2(input: List<String>): Int {
                 "seven" -> 7
                 "eight" -> 8
                 "nine" -> 9
-                else -> throw AssertionError(digit)
+                else -> error(digit)
             }
         }
     }

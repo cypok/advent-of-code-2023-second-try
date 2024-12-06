@@ -27,7 +27,7 @@ private fun solve1(input: List<String>): Int {
                     "red" -> num <= 12
                     "green" -> num <= 13
                     "blue" -> num <= 14
-                    else -> throw IllegalStateException()
+                    else -> shouldNotReachHere()
                 }
             }
         }
@@ -46,7 +46,7 @@ private fun solve2(input: List<String>): Int {
                     "red"   -> acc.copy(red   = max(acc.red,   num))
                     "green" -> acc.copy(green = max(acc.green, num))
                     "blue"  -> acc.copy(blue  = max(acc.blue,  num))
-                    else -> throw IllegalStateException()
+                    else -> error(colorStr)
                 }
             }
         }

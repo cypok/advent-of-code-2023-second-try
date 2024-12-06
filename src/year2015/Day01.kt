@@ -24,6 +24,6 @@ private fun solve2(input: List<String>): Int {
             return i + 1
         }
     }
-    error("should not reach here")
+    shouldNotReachHere()
 }
 

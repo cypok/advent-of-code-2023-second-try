@@ -106,7 +106,7 @@ private fun parseModules(input: List<String>): Map<String, Module> {
             fullName == Broadcaster.NAME -> Broadcaster(outputs)
             fullName.startsWith('%') -> FlipFlop(fullName.substring(1), outputs)
             fullName.startsWith('&') -> Conjunction(fullName.substring(1), outputs)
-            else -> throw IllegalArgumentException(it)
+            else -> error(it)
         }
         module.name to module
     }.toMutableMap()

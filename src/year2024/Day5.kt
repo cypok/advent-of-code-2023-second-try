@@ -42,32 +42,29 @@ fun main() = runAoc {
         """
     }
 
-    solution1 { solve(lines, fixing = false) }
-    solution2 { solve(lines, fixing = true) }
-}
+    solution {
+        val (rulesLines, updates) = lines.splitByEmptyLines().toList()
+        val rules = rulesLines.map {
+            it.numbers().let { (a, b) -> a to b }
+        }.toSet()
 
-private fun solve(input: List<String>, fixing: Boolean): Long {
-    val (rulesLines, updates) = input.splitByEmptyLines().toList()
-    val rules = rulesLines.map {
-        it.numbers().let { (a, b) -> a to b }
-    }.toSet()
-
-    return updates.sumOf { update ->
-        val pages = update.numbers()
-        val right = isRightOrder(pages, rules)
-        if (fixing) {
-            if (right) {
-                0
+        updates.sumOf { update ->
+            val pages = update.numbers()
+            val right = isRightOrder(pages, rules)
+            if (isPart2) {
+                if (right) {
+                    0
+                } else {
+                    pages.sortedWith(comparatorByRules(rules)).middle()
+                }
             } else {
-                pages.sortedWith(comparatorByRules(rules)).middle()
-            }
-        } else {
-            if (right) {
-                pages.middle()
-            } else {
-                0
-            }
-        }.toLong()
+                if (right) {
+                    pages.middle()
+                } else {
+                    0
+                }
+            }.toLong()
+        }
     }
 }
 

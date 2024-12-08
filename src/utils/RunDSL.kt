@@ -13,6 +13,7 @@ import kotlin.time.measureTimedValue
 interface AocContext {
     fun example(description: String? = null, content: ExampleContext.() -> String)
 
+    fun solution(code: Solution)
     fun solution1(code: Solution)
     fun solution2(code: Solution)
 }
@@ -25,6 +26,9 @@ interface ExampleContext {
 interface SolutionContext {
     val lines: List<String>
     val map: StringArray2D
+
+    val isPart1: Boolean
+    val isPart2: Boolean
 }
 
 typealias Solution = SolutionContext.() -> Any
@@ -53,6 +57,11 @@ fun runAoc(content: AocContext.() -> Unit) {
 
         override fun solution1(code: SolutionContext.() -> Any) = solutions.putEnsuringNew(1, code)
         override fun solution2(code: SolutionContext.() -> Any) = solutions.putEnsuringNew(2, code)
+
+        override fun solution(code: SolutionContext.() -> Any) {
+            solution1(code)
+            solution2(code)
+        }
     }
 
     ctx.content()
@@ -83,6 +92,9 @@ fun runAoc(content: AocContext.() -> Unit) {
             val solutionCtx = object : SolutionContext {
                 override val lines = input.trimEnd('\n').lines()
                 override val map by lazy { StringArray2D(lines) }
+
+                override val isPart1 get() = partNum == 1
+                override val isPart2 get() = partNum == 2
             }
             print("part$partNum, $runDesc: ")
             val (result, time) = measureTimedValue { runCatching { solutionCtx.solution() } }

@@ -25,27 +25,24 @@ fun main() = runAoc {
         """
     }
 
-    solution1 { solve(advanced = false) }
-    solution2 { solve(advanced = true) }
-}
-
-private fun SolutionContext.solve(advanced: Boolean): Int {
-    val antennas = buildMap {
-        for (i in 0..<map.height) {
-            for (j in 0..<map.width) {
-                val ch = map[i, j]
-                if (!ch.isLetterOrDigit()) continue
-                val points = getOrPut(ch) { mutableListOf() }
-                points += i x j
+    solution {
+        val antennas = buildMap {
+            for (i in 0..<map.height) {
+                for (j in 0..<map.width) {
+                    val ch = map[i, j]
+                    if (!ch.isLetterOrDigit()) continue
+                    val points = getOrPut(ch) { mutableListOf() }
+                    points += i x j
+                }
             }
         }
-    }
 
-    return antennas.values.flatMap { locs ->
-        locs.combinations().flatMap { (p1, p2) ->
-            antinodesLocations(advanced, map, p1, p2)
-        }
-    }.toSet().size
+        antennas.values.flatMap { locs ->
+            locs.combinations().flatMap { (p1, p2) ->
+                antinodesLocations(isPart2, map, p1, p2)
+            }
+        }.toSet().size
+    }
 }
 
 private fun antinodesLocations(advanced: Boolean, map: StringArray2D, p1: Point, p2: Point) = buildList {

@@ -22,36 +22,34 @@ fun main() = runAoc {
         """
     }
 
-    solution1 { solution(allowConcatenation = false) }
-    solution2 { solution(allowConcatenation = true) }
-}
+    solution {
+        lines.sumOf { line ->
+            val allLine = line.numbers()
+            val expected = allLine.first()
+            val nums = allLine.drop(1)
 
-private fun SolutionContext.solution(allowConcatenation: Boolean): Long =
-    lines.sumOf { line ->
-        val allLine = line.numbers()
-        val expected = allLine.first()
-        val nums = allLine.drop(1)
+            fun bruteForce(curIdx: Int, curResult: Long): Boolean {
+                if (curIdx == nums.size) {
+                    return curResult == expected
+                }
+                if (curResult > expected) {
+                    return false
+                }
 
-        fun bruteForce(curIdx: Int, curResult: Long): Boolean {
-            if (curIdx == nums.size) {
-                return curResult == expected
+                val nextNum = nums[curIdx]
+
+                return  bruteForce(curIdx + 1, curResult * nextNum) ||
+                        bruteForce(curIdx + 1, curResult + nextNum) ||
+                        (isPart2 && bruteForce(curIdx + 1, concatenate(curResult, nextNum)))
             }
-            if (curResult > expected) {
-                return false
+
+            if (bruteForce(1, nums[0])) {
+                expected
+            } else {
+                0
             }
-
-            val nextNum = nums[curIdx]
-
-            return  bruteForce(curIdx + 1, curResult * nextNum) ||
-                    bruteForce(curIdx + 1, curResult + nextNum) ||
-                    (allowConcatenation && bruteForce(curIdx + 1, concatenate(curResult, nextNum)))
-        }
-
-        if (bruteForce(1, nums[0])) {
-            expected
-        } else {
-            0
         }
     }
+}
 
 private fun concatenate(x: Long, y: Long) = "$x$y".toLong()

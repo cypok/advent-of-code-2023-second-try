@@ -59,6 +59,9 @@ class StringArray2D(private val strings: List<String>) {
     val height: Int get() = strings.size
     val width: Int get() = strings[0].length
 
+    operator fun contains(pos: Point): Boolean =
+        (pos.row in 0 ..< height) && (pos.col in 0 ..< width)
+
     operator fun get(row: Int, col: Int): Char =
         strings[row][col]
 

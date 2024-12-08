@@ -24,6 +24,7 @@ interface ExampleContext {
 
 interface SolutionContext {
     val lines: List<String>
+    val map: StringArray2D
 }
 
 typealias Solution = SolutionContext.() -> Any
@@ -81,6 +82,7 @@ fun runAoc(content: AocContext.() -> Unit) {
         fun runOne(runDesc: String, input: String, answer: Any?) {
             val solutionCtx = object : SolutionContext {
                 override val lines = input.trimEnd('\n').lines()
+                override val map by lazy { StringArray2D(lines) }
             }
             print("part$partNum, $runDesc: ")
             val (result, time) = measureTimedValue { runCatching { solutionCtx.solution() } }

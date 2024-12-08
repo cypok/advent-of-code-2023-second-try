@@ -62,6 +62,14 @@ fun <T> Collection<Iterable<T>>.cartesianProduct(): List<List<T>> {
 fun <T> Collection<T>.cycle(): Sequence<T> =
     generateSequence { this }.flatten()
 
+fun <T> List<T>.combinations(): List<Pair<T, T>> = buildList {
+    for (i in 0 ..< this@combinations.size) {
+        for (j in i+1 ..< this@combinations.size) {
+            add(this@combinations[i] to this@combinations[j])
+        }
+    }
+}
+
 fun gcd(x: Long, y: Long): Long {
     var a = max(x, y)
     var b = min(x, y)

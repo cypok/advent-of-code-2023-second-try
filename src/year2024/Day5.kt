@@ -71,16 +71,8 @@ private fun solve(input: List<String>, fixing: Boolean): Long {
     }
 }
 
-private fun isRightOrder(pages: List<Long>, rules: Set<Pair<Long, Long>>): Boolean {
-    for (i in 0..<pages.size) {
-        for (j in i+1..<pages.size) {
-            if ((pages[j] to pages[i]) in rules) {
-                return false
-            }
-        }
-    }
-    return true
-}
+private fun isRightOrder(pages: List<Long>, rules: Set<Pair<Long, Long>>): Boolean =
+    pages.combinations().all { (i, j) -> (j to i) !in rules }
 
 private fun comparatorByRules(rules: Set<Pair<Long, Long>>) =
     Comparator<Long> { x, y ->

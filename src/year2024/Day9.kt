@@ -90,6 +90,7 @@ fun main() = runAoc {
 
         fileList.asReversed().sumOf { file ->
             val filePos = freeList
+                .asSequence()
                 .takeWhile { it.pos < file.pos }
                 .firstOrNull { it.size >= file.size }
                 ?.let { free ->

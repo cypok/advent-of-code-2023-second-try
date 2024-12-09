@@ -27,12 +27,9 @@ fun main() = runAoc {
 
     solution {
         val antennas = buildMap {
-            for (i in 0..<map.height) {
-                for (j in 0..<map.width) {
-                    val ch = map[i, j]
-                    if (!ch.isLetterOrDigit()) continue
-                    val points = getOrPut(ch) { mutableListOf() }
-                    points += i x j
+            for ((ch, pos) in map.valuesIndexed) {
+                if (ch.isLetterOrDigit()) {
+                    getOrPut(ch) { mutableListOf<Point>() } += pos
                 }
             }
         }

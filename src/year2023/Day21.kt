@@ -13,13 +13,7 @@ private fun solveFinite(input: List<String>, steps: Int): Long {
     val map = StringArray2D(input)
     val moves = Array(map.height) { Array(map.width) { -1 } }
 
-    for (i in 0 until map.height) {
-        for (j in 0 until map.width) {
-            if (map[i, j] == 'S') {
-                moves[i, j] = 0
-            }
-        }
-    }
+    moves[map.find('S')] = 0
 
     fun step(dir: Dir, base: Point, s: Int) {
         val next = base.moveInDir(dir)
@@ -33,15 +27,12 @@ private fun solveFinite(input: List<String>, steps: Int): Long {
     }
 
     repeat(steps) { s ->
-        for (i in 0 until map.height) {
-            for (j in 0 until map.width) {
-                val base = i x j
-                if (moves[base] == s) {
-                    step(UP, base, s)
-                    step(LEFT, base, s)
-                    step(DOWN, base, s)
-                    step(RIGHT, base, s)
-                }
+        for (base in map.indices) {
+            if (moves[base] == s) {
+                step(UP, base, s)
+                step(LEFT, base, s)
+                step(DOWN, base, s)
+                step(RIGHT, base, s)
             }
         }
     }
@@ -61,12 +52,8 @@ private fun solveInfinite(input: List<String>, totalSteps: Int): Long {
 
     fun posForMap(p: Point) = p.row.mod(map.height) x p.col.mod(map.width)
 
-    for (i in 0 until map.height) {
-        for (j in 0 until map.width) {
-            if (map[i, j] == 'S') {
-                marks[i + multiplier / 2 * map.height, j + multiplier / 2 * map.width] = 0
-            }
-        }
+    map.find('S').let { (i, j) ->
+        marks[i + multiplier / 2 * map.height, j + multiplier / 2 * map.width] = 0
     }
 
     fun step(dir: Dir, base: Point, s: Int): Boolean {

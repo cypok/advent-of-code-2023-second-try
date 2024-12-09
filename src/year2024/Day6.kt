@@ -89,7 +89,7 @@ fun main() = runAoc {
 
 private fun solve1(input: List<String>): Int {
     val map = StringArray2D(input)
-    var curPos = findGuard(map)
+    var curPos = map.find('^')
     var curDir = Dir.UP
 
     val visited = mutableSetOf<Point>()
@@ -109,7 +109,7 @@ private fun solve1(input: List<String>): Int {
 
 private fun solve2(input: List<String> ): Int {
     val map = StringArray2D(input)
-    val originalGuardPos = findGuard(map)
+    val originalGuardPos = map.find('^')
 
     var curPos = originalGuardPos
     var curDir = Dir.UP
@@ -146,20 +146,16 @@ private fun solve2(input: List<String> ): Int {
 
 private fun solve2BruteForce(input: List<String>): Int {
     val map = StringArray2D(input)
-    val originalGuardPos = findGuard(map)
+    val originalGuardPos = map.find('^')
     val originalGuardDir = Dir.UP
 
-    return (0..<map.height).sumOf { i ->
-        (0..<map.width).sumOf { j ->
-            val pos = i x j
-            val field = map[pos]
-            if (field != '#' && field != '^' &&
-                wouldLoop(map, pos, originalGuardPos, originalGuardDir)) {
-                1
-            } else {
-                @Suppress("USELESS_CAST") // KT-46360
-                0 as Int
-            }
+    return map.valuesIndexed.sumOf { (field, pos) ->
+        if (field != '#' && field != '^' &&
+            wouldLoop(map, pos, originalGuardPos, originalGuardDir)) {
+            1
+        } else {
+            @Suppress("USELESS_CAST") // KT-46360
+            0 as Int
         }
     }
 }
@@ -183,15 +179,4 @@ private fun wouldLoop(map: StringArray2D, extraObstruction: Point,
             else -> curPos = nextPos
         }
     }
-}
-
-private fun findGuard(map: StringArray2D): Point {
-    for (i in 0..<map.height) {
-        for (j in 0..<map.width) {
-            if (map[i, j] == '^') {
-                return i x j
-            }
-        }
-    }
-    shouldNotReachHere()
 }

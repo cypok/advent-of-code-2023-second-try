@@ -119,6 +119,27 @@ class StringArray2D(private val strings: List<String>) {
                 add((iMin..iMax).map { i -> get(i, j - i) })
             }
         }
+
+    val indices: Sequence<Point> = sequence {
+        for (i in 0 until height) {
+            for (j in 0 until width) {
+                yield(i x j)
+            }
+        }
+    }
+
+    val valuesIndexed: Sequence<Pair<Char, Point>> =
+        indices.map { get(it) to it }
+
+    fun find(ch: Char): Point = find { it == ch }
+
+    fun find(predicate: (Char) -> Boolean): Point =
+        valuesIndexed
+            .mapNotNull { (ch, pos) -> pos.takeIf { predicate(ch) } }
+            .toList()
+            .also { check(it.size == 1) { it } }
+            .first()
+
 }
 
 operator fun <T> Array<Array<T>>.get(i: Int, j: Int): T = this[i][j]

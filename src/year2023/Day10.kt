@@ -10,16 +10,9 @@ fun main() = test(
 
 private fun solve(input: List<String>): Pair<Long, Long> {
     val map = StringArray2D(input)
-
-    for (i in 0 until map.height) {
-        for (j in 0 until map.width) {
-            if (map[i, j] == 'S') {
-                return startAt(map, i, j)
-            }
-        }
+    map.find('S').let { (i, j) ->
+        return startAt(map, i, j)
     }
-
-    error("start not found")
 }
 
 private val pipes = mapOf(

@@ -1,6 +1,8 @@
 package year2024
 
+import kotlinx.coroutines.*
 import utils.*
+import java.util.concurrent.ConcurrentHashMap
 
 // Task description:
 //   https://adventofcode.com/2024/day/6
@@ -114,24 +116,31 @@ private fun solve2(input: List<String> ): Int {
     var curPos = originalGuardPos
     var curDir = Dir.UP
 
-    val possibleObstructions = mutableSetOf<Point>()
+    val possibleObstructions = ConcurrentHashMap<Point, Boolean>()
     val visited = mutableSetOf(curPos)
-    while (true) {
-        val nextPos = curPos.moveInDir(curDir)
-        val nextField = map.getOrNull(nextPos)
-        when (nextField) {
-            null -> break
-            '#' -> {
-                curDir = curDir.right
+    runBlocking(Dispatchers.Default) {
+        fun tryLoopAsync(obstructionPos: Point, startPos: Point, startDir: Dir) = launch {
+            if (wouldLoop(map, obstructionPos, startPos, startDir)) {
+                possibleObstructions[obstructionPos] = true
             }
-            else -> {
-                if (nextPos !in visited &&
-                    nextPos !in possibleObstructions &&
-                    wouldLoop(map, nextPos, curPos, curDir)) {
-                    possibleObstructions += nextPos
+        }
+
+        while (true) {
+            val nextPos = curPos.moveInDir(curDir)
+            val nextField = map.getOrNull(nextPos)
+            when (nextField) {
+                null -> break
+                '#' -> {
+                    curDir = curDir.right
                 }
-                curPos = nextPos
-                visited += curPos
+
+                else -> {
+                    if (nextPos !in visited && !possibleObstructions.contains(nextPos)) {
+                        tryLoopAsync(nextPos, curPos, curDir)
+                    }
+                    curPos = nextPos
+                    visited += curPos
+                }
             }
         }
     }

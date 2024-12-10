@@ -4,8 +4,8 @@
 import utils.*
 
 #set($YearUrl = $PACKAGE_NAME.substring(4))
-#set($DayUrl = $Day)
-#if ($DayUrl.startsWith("0"))
+#set($DayUrl = $DayTwoDigits)
+#if($DayUrl.startsWith("0"))
 #set($DayUrl = $DayUrl.substring(1))
 #end
 // Task description:

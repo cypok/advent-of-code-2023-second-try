@@ -83,4 +83,20 @@ class Tests {
         assertEquals(listOf(37L, -42L), "37,-42".numbers())
     }
 
+    @Test
+    fun testMultiSet() {
+        val set = multiSetOf(10, 20, 20)
+
+        assertEquals(1, set[10])
+        assertEquals(2, set[20])
+        assertEquals(0, set[30])
+
+        assertEquals(setOf(10 to 1L, 20 to 2L), set.grouped.map { it.elem to it.count }.toSet())
+
+        set.add(10, 100)
+        assertEquals(101, set[10])
+
+        set.add(30, 100)
+        assertEquals(100, set[30])
+    }
 }

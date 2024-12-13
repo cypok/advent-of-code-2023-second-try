@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.1.0"
+    id("application")
 }
 
 kotlin {
@@ -24,6 +25,16 @@ tasks {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+}
+
+application {
+    mainClass.set(
+        if (hasProperty("year") && hasProperty("day")) {
+            "year${property("year")}.Day${property("day")}Kt"
+        } else {
+            "-Pyear=YYYY and -Pday=DD should be set"
+        }
+    )
 }
 
 tasks.named<Test>("test") {

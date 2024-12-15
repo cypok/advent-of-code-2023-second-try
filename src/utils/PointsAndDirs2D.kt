@@ -44,10 +44,10 @@ enum class Dir {
 
     companion object {
         fun fromChar(ch: Char) = when (ch) {
-            'U' -> UP
-            'D' -> DOWN
-            'L' -> LEFT
-            'R' -> RIGHT
+            'U', '^' -> UP
+            'D', 'v' -> DOWN
+            'L', '<' -> LEFT
+            'R', '>' -> RIGHT
             else -> error(ch)
         }
     }
@@ -147,6 +147,15 @@ operator fun <T> Array<Array<T>>.set(i: Int, j: Int, v: T) { this[i][j] = v }
 operator fun <T> Array<Array<T>>.get(pos: Point): T = this[pos.i][pos.j]
 operator fun <T> Array<Array<T>>.set(pos: Point, v: T) { this[pos.i][pos.j] = v }
 fun <T> Array<Array<T>>.getOrNull(pos: Point): T? = this.getOrNull(pos.i)?.getOrNull(pos.j)
+
+val <T> Array<Array<T>>.valuesIndexed: Sequence<Pair<T, Point>>
+    get() = sequence {
+        for (i in 0 until this@valuesIndexed.size) {
+            for (j in 0 until this@valuesIndexed[i].size) {
+                yield(get(i, j) to (i x j))
+            }
+        }
+    }
 
 fun List<Char>.asString(): String =
     String(toCharArray())

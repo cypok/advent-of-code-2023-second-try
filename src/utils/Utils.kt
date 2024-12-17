@@ -92,4 +92,26 @@ operator fun <T> List<T>.component6() = get(5)
 
 fun <T> List<T>.middle(): T = this[this.size/2]
 
+inline fun <T> Iterable<T>.countWhile(predicate: (T) -> Boolean): Int {
+    var idx = 0
+    for (item in this) {
+        if (!predicate(item)) {
+            break
+        }
+        idx++
+    }
+    return idx
+}
+
+inline fun <T> List<T>.countLastWhile(predicate: (T) -> Boolean): Int {
+    var idx = size - 1
+    while (idx >= 0) {
+        if (!predicate(get(idx))) {
+            break
+        }
+        idx--
+    }
+    return size - 1 - idx
+}
+
 fun shouldNotReachHere(): Nothing = error("should not reach here")

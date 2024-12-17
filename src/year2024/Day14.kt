@@ -45,8 +45,8 @@ fun main() = runAoc {
                 }
             }
             for (r in robots) {
-                r.px = (r.px + r.vx + width) % width
-                r.py = (r.py + r.vy + height) % height
+                r.px = (r.px + r.vx).mod(width)
+                r.py = (r.py + r.vy).mod(height)
             }
         }
 

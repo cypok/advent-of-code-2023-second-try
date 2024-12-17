@@ -99,4 +99,17 @@ class Tests {
         set.add(30, 100)
         assertEquals(100, set[30])
     }
+
+    @Test
+    fun testCountWhile() {
+        assertEquals(3, listOf(-10, -5, -3, 20, -5, -7).countWhile { it < 0 })
+        assertEquals(0, listOf(10, -5, -3, 20, -5, -7).countWhile { it < 0 })
+        assertEquals(6, listOf(-10, -5, -3, -20, -5, -7).countWhile { it < 0 })
+        assertEquals(0, listOf<Int>().countWhile { it < 0 })
+
+        assertEquals(2, listOf(-10, -5, -3, 20, -5, -7).countLastWhile { it < 0 })
+        assertEquals(0, listOf(10, -5, -3, 20, -5, 7).countLastWhile { it < 0 })
+        assertEquals(6, listOf(-10, -5, -3, -20, -5, -7).countLastWhile { it < 0 })
+        assertEquals(0, listOf<Int>().countLastWhile { it < 0 })
+    }
 }

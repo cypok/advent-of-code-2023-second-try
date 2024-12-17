@@ -99,7 +99,7 @@ fun runAoc(content: AocContext.() -> Unit) {
             print("part$partNum, $runDesc: ")
             val (result, time) = measureTimedValue { runCatching { solutionCtx.solution() } }
             print(result.getOrNull()?.let {
-                if (answer == null || isCorrectAnswer(answer, it)) {
+                if (answer == null || answer.toString() == it.toString()) {
                     "$it"
                 } else {
                     "$it (WRONG ANSWER, expected $answer)"
@@ -123,14 +123,6 @@ private fun <K, V> MutableMap<K, V>.putEnsuringNew(key: K, value: V) {
     val oldValue = put(key, value)
     check(oldValue == null)
 }
-
-private fun isCorrectAnswer(expected: Any, actual: Any): Boolean =
-    if (expected is Number && actual is Number) {
-        // It's a complete mess of boxed Ints and Longs, so we try to unbox and compare them explicitly
-        expected.toLong() == actual.toLong()
-    } else {
-        expected == actual
-    }
 
 private fun downloadRealInput(year: Int, day: Int, outputPath: Path): String {
     val url = URI("https://adventofcode.com/$year/day/$day/input").toURL()

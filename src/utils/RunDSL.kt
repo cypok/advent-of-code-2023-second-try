@@ -11,6 +11,8 @@ import kotlin.streams.asSequence
 import kotlin.time.measureTimedValue
 
 interface AocContext {
+    fun ignoreRealInput()
+
     fun example(description: String? = null, content: ExampleContext.() -> String)
 
     fun solution(code: Solution)
@@ -40,8 +42,11 @@ private data class Example(val description: String?,
 
 fun runAoc(content: AocContext.() -> Unit) {
     val ctx = object : AocContext {
+        var ignoreRealInput = false
         val examples = mutableListOf<Example>()
         val solutions = mutableMapOf<Int, Solution>()
+
+        override fun ignoreRealInput() { ignoreRealInput = true }
 
         override fun example(description: String?, content: ExampleContext.() -> String) {
             val codeLocation = findCallerFromMainFrame().let { "line ${it.lineNumber}" }
@@ -115,7 +120,9 @@ fun runAoc(content: AocContext.() -> Unit) {
             runOne("example $desc", example.input, answer)
         }
 
-        runOne("real", realInput.readText(), null)
+        if (!ctx.ignoreRealInput) {
+            runOne("real", realInput.readText(), null)
+        }
     }
 }
 

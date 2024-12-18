@@ -45,9 +45,7 @@ fun main() = runAoc {
         val height = 1 + bytes.maxOf { it.i }
         val width = 1 + bytes.maxOf { it.j }
 
-        val canvas = Array(height) { Array(width) { '.' } }
-
-        fun calcStepsToFinish(): Int {
+        fun calcStepsToFinish(canvas: Array<Array<Char>>): Int {
             val visited = Array(height) { Array(width) { Int.MAX_VALUE } }
             val nextSteps = ArrayDeque(listOf((0 x 0) to 0))
 
@@ -67,23 +65,44 @@ fun main() = runAoc {
         }
 
         if (isPart1) {
-            val fallenCount =
+            val bytesCount =
                 when (height) {
                     7 -> 12 // example
                     71 -> 1024 // real input
                     else -> error(height)
                 }
-            bytes.take(fallenCount).forEach { b -> canvas[b] = '#' }
-            calcStepsToFinish()
+            val canvas = Array(height) { Array(width) { '.' } }
+            bytes.asSequence().take(bytesCount).forEach { canvas[it] = '#' }
+            calcStepsToFinish(canvas)
 
         } else {
-            for (byte in bytes) {
-                canvas[byte] = '#'
-                if (calcStepsToFinish() == Int.MAX_VALUE) {
-                    return@solution "${byte.j},${byte.i}"
+            var low = 0 // always non-blocked
+            var high = bytes.size - 1 // always blocked
+
+            val canvas = Array(height) { Array(width) { '.' } }
+            var prevCount = 0
+
+            while (low + 1 != high) {
+                val mid = low + (high - low) / 2
+
+                if (mid > prevCount) {
+                    bytes.subList(prevCount, mid).forEach { assert(canvas[it] == '.'); canvas[it] = '#' }
+                } else {
+                    assert(mid < prevCount)
+                    bytes.subList(mid, prevCount).forEach { assert(canvas[it] == '#'); canvas[it] = '.' }
+                }
+                prevCount = mid
+
+                val isBlocked = calcStepsToFinish(canvas) == Int.MAX_VALUE
+                if (isBlocked) {
+                    high = mid
+                } else {
+                    low = mid
                 }
             }
 
+            val byte = bytes[low]
+            return@solution "${byte.j},${byte.i}"
         }
     }
 }

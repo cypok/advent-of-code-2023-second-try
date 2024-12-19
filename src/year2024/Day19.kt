@@ -24,29 +24,68 @@ fun main() = runAoc {
     }
     solution {
         val (availableTowelsStr, designs) = lines.splitByEmptyLines().toList()
-        val availableTowels = availableTowelsStr.single().split(", ").toList()
+        val allTowels = PrefixTree.make(availableTowelsStr.single().split(", ").toList())
 
-        fun isPossible(design: String, offset: Int): Boolean =
-            (offset == design.length) ||
-                    availableTowels.any { towel ->
-                        design.startsWith(towel, offset) && isPossible(design, offset + towel.length)
-                    }
-
-        fun countWays(design: String, offset: Int): Long {
+        fun isPossible(design: String, offset: Int, towels: PrefixTree): Boolean {
             if (offset == design.length) {
-                return 1
+                return towels.hasValue() || towels === allTowels
             }
 
-            return availableTowels.sumOf { towel ->
-                if (!design.startsWith(towel, offset)) return@sumOf 0L
-                countWays(design, offset + towel.length)
+            if (towels.hasValue() && isPossible(design, offset, allTowels)) {
+                return true
             }
+
+            val subTowels = towels.children[design[offset]]
+            return subTowels != null && isPossible(design, offset + 1, subTowels)
+        }
+
+        fun countWays(design: String): Long {
+            val cache = mutableMapOf<Int, Long>()
+
+            fun count(offset: Int, towels: PrefixTree): Long {
+                if (offset == design.length) {
+                    return 1L
+                }
+
+                var ways = 0L
+
+                if (towels.hasValue()) {
+                    ways += cache.getOrPut(offset) { count(offset, allTowels) }
+                }
+
+                val subTowels = towels.children[design[offset]]
+                if (subTowels != null) {
+                    ways += count(offset + 1, subTowels)
+                }
+
+                return ways
+            }
+
+            return count(0, allTowels)
         }
 
         if (isPart1) {
-            designs.count { isPossible(it, 0) }
+            designs.count { isPossible(it, 0, allTowels) }
         } else {
-            designs.sumOf { countWays(it, 0) }
+            designs.sumOf { countWays(it) }
         }
+    }
+}
+
+private class PrefixTree(val value: String?, val children: Map<Char, PrefixTree>) {
+
+    fun hasValue() = value != null
+
+    companion object {
+        fun make(strs: List<String>): PrefixTree = make(strs, 0)
+
+        private fun make(strs: List<String>, offset: Int): PrefixTree =
+            PrefixTree(
+                strs.find { it.length == offset },
+                strs
+                    .filter { it.length > offset }
+                    .groupBy { it[offset] }
+                    .mapValues { make(it.value, offset + 1) })
+
     }
 }

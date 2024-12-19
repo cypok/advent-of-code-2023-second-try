@@ -93,7 +93,7 @@ fun runAoc(content: AocContext.() -> Unit) {
     }
 
     for ((partNum, solution) in ctx.solutions.entries.sortedBy { it.key }) {
-        fun runOne(runDesc: String, input: String, answer: Any?) {
+        fun runOne(runDesc: String, input: String, answer: Any? = null, timed: Boolean = false) {
             val solutionCtx = object : SolutionContext {
                 override val lines = input.trimEnd('\n').lines()
                 override val map by lazy { StringArray2D(lines) }
@@ -110,7 +110,24 @@ fun runAoc(content: AocContext.() -> Unit) {
                     "$it (WRONG ANSWER, expected $answer)"
                 }
             } ?: "EXCEPTION")
-            println(" (took ${time.inWholeMilliseconds} ms)")
+            if (timed && result.isSuccess) {
+                var totalTime = time
+                print(" (took ${time.inWholeMilliseconds}")
+                if (time.inWholeSeconds <= 5) {
+                    for (i in 0 until 10) {
+                        if (totalTime.inWholeSeconds > 10) {
+                            break
+                        }
+                        val (newResult, newTime) = measureTimedValue { runCatching { solutionCtx.solution() } }
+                        assert(newResult == result)
+                        print(", ${newTime.inWholeMilliseconds}")
+                        System.out.flush()
+                        totalTime += newTime
+                    }
+                }
+                print(" ms)")
+            }
+            println()
             result.onFailure { it.printStackTrace(System.out) }
         }
 
@@ -121,7 +138,7 @@ fun runAoc(content: AocContext.() -> Unit) {
         }
 
         if (!ctx.ignoreRealInput) {
-            runOne("real", realInput.readText(), null)
+            runOne("real", realInput.readText(), timed = true)
         }
     }
 }

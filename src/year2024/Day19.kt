@@ -22,6 +22,17 @@ fun main() = runAoc {
             bbrgwb
         """
     }
+    example("tricky end") {
+        answer1(1)
+        answer2(1)
+        """
+            abc
+
+            ab
+            abc
+            abcd
+        """
+    }
     solution {
         val (availableTowelsStr, designs) = lines.splitByEmptyLines().toList()
         val allTowels = PrefixTree.make(availableTowelsStr.single().split(", ").toList())
@@ -44,7 +55,7 @@ fun main() = runAoc {
 
             fun count(offset: Int, towels: PrefixTree): Long {
                 if (offset == design.length) {
-                    return 1L
+                    return if (towels.hasValue() || towels === allTowels) 1 else 0
                 }
 
                 var ways = 0L

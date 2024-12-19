@@ -33,21 +33,36 @@ fun main() = runAoc {
             abcd
         """
     }
+    example("hard artificial") {
+        answer1(0)
+        answer2(0)
+        """
+            a, aa
+
+            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaax
+        """
+    }
     solution {
         val (availableTowelsStr, designs) = lines.splitByEmptyLines().toList()
         val allTowels = PrefixTree.make(availableTowelsStr.single().split(", ").toList())
 
-        fun isPossible(design: String, offset: Int, towels: PrefixTree): Boolean {
-            if (offset == design.length) {
-                return towels.hasValue() || towels === allTowels
+        fun isPossible(design: String): Boolean {
+            val cache = mutableMapOf<Int, Boolean>()
+
+            fun check(offset: Int, towels: PrefixTree): Boolean {
+                if (offset == design.length) {
+                    return towels.hasValue() || towels === allTowels
+                }
+
+                if (towels.hasValue() && cache.getOrPut(offset) { check(offset, allTowels) }) {
+                    return true
+                }
+
+                val subTowels = towels.children[design[offset]]
+                return subTowels != null && check(offset + 1, subTowels)
             }
 
-            if (towels.hasValue() && isPossible(design, offset, allTowels)) {
-                return true
-            }
-
-            val subTowels = towels.children[design[offset]]
-            return subTowels != null && isPossible(design, offset + 1, subTowels)
+            return check(0, allTowels)
         }
 
         fun countWays(design: String): Long {
@@ -76,7 +91,7 @@ fun main() = runAoc {
         }
 
         if (isPart1) {
-            designs.count { isPossible(it, 0, allTowels) }
+            designs.count { isPossible(it) }
         } else {
             designs.sumOf { countWays(it) }
         }

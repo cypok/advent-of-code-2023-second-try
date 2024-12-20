@@ -7,7 +7,7 @@ import utils.*
 
 fun main() = runAoc {
     example {
-        answer1(22)
+        answer1(22, 12)
         answer2("6,1")
         """
             5,4
@@ -65,12 +65,7 @@ fun main() = runAoc {
         }
 
         if (isPart1) {
-            val bytesCount =
-                when (height) {
-                    7 -> 12 // example
-                    71 -> 1024 // real input
-                    else -> error(height)
-                }
+            val bytesCount = exampleParam as? Int ?: 1024
             val canvas = Array(height) { Array(width) { '.' } }
             bytes.asSequence().take(bytesCount).forEach { canvas[it] = '#' }
             calcStepsToFinish(canvas)

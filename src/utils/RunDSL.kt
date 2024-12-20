@@ -21,8 +21,8 @@ interface AocContext {
 }
 
 interface ExampleContext {
-    fun answer1(value: Any)
-    fun answer2(value: Any)
+    fun answer1(value: Any, param: Any? = null)
+    fun answer2(value: Any, param: Any? = null)
 }
 
 interface SolutionContext {
@@ -31,6 +31,8 @@ interface SolutionContext {
 
     val isPart1: Boolean
     val isPart2: Boolean
+
+    val exampleParam: Any?
 }
 
 typealias Solution = SolutionContext.() -> Any
@@ -38,7 +40,7 @@ typealias Solution = SolutionContext.() -> Any
 private data class Example(val description: String?,
                            val codeLocation: String,
                            val input: String,
-                           val answers: Map<Int, Any>)
+                           val answers: Map<Int, Pair<Any, Any?>>)
 
 fun runAoc(content: AocContext.() -> Unit) {
     val ctx = object : AocContext {
@@ -50,10 +52,10 @@ fun runAoc(content: AocContext.() -> Unit) {
 
         override fun example(description: String?, content: ExampleContext.() -> String) {
             val codeLocation = findCallerFromMainFrame().let { "line ${it.lineNumber}" }
-            val answers = mutableMapOf<Int, Any>()
+            val answers = mutableMapOf<Int, Pair<Any, Any?>>()
             val ctx = object : ExampleContext {
-                override fun answer1(value: Any) = answers.putEnsuringNew(1, value)
-                override fun answer2(value: Any) = answers.putEnsuringNew(2, value)
+                override fun answer1(value: Any, param: Any?) = answers.putEnsuringNew(1, value to param)
+                override fun answer2(value: Any, param: Any?) = answers.putEnsuringNew(2, value to param)
             }
             val input = ctx.content().trimIndent()
             require(answers.isNotEmpty()) { "at least one answer for any part" }
@@ -93,13 +95,15 @@ fun runAoc(content: AocContext.() -> Unit) {
     }
 
     for ((partNum, solution) in ctx.solutions.entries.sortedBy { it.key }) {
-        fun runOne(runDesc: String, input: String, answer: Any? = null, timed: Boolean = false) {
+        fun runOne(runDesc: String, input: String, answer: Any? = null, param: Any? = null, timed: Boolean = false) {
             val solutionCtx = object : SolutionContext {
                 override val lines = input.trimEnd('\n').lines()
                 override val map by lazy { StringArray2D(lines) }
 
                 override val isPart1 get() = partNum == 1
                 override val isPart2 get() = partNum == 2
+
+                override val exampleParam = param
             }
             print("part$partNum, $runDesc: ")
             val (result, time) = measureTimedValue { runCatching { solutionCtx.solution() } }
@@ -132,9 +136,9 @@ fun runAoc(content: AocContext.() -> Unit) {
         }
 
         for (example in ctx.examples) {
-            val answer = example.answers[partNum] ?: continue
+            val (answer, param) = example.answers[partNum] ?: continue
             val desc = example.description ?: "at ${example.codeLocation}"
-            runOne("example $desc", example.input, answer)
+            runOne("example $desc", example.input, answer, param)
         }
 
         if (!ctx.ignoreRealInput) {

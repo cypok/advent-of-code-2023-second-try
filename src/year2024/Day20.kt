@@ -10,8 +10,8 @@ import kotlin.math.min
 
 fun main() = runAoc {
     example {
-        answer1(8)
-        answer2(41)
+        answer1(8, 12)
+        answer2(41, 70)
         """
             ###############
             #...#...#.....#
@@ -52,14 +52,7 @@ fun main() = runAoc {
             }
         }
 
-        val minCheatSavedTime =
-            if (map.height > 100) {
-                // real input
-                100
-            } else {
-                // example
-                if (isPart1) 12 else 70
-            }
+        val minCheatSavedTime = exampleParam as? Int ?: 100
         val maxCheatDistance = if (isPart1) 2 else 20
         val cheats = mutableListOf<Pair<Point, Point>>()
 

@@ -111,7 +111,7 @@ private class Graph(input: List<String>) {
             listOf(start),
             { path, dst -> path + dst },
             { path -> path.last() },
-            finish to { path -> path.windowed(2).map { (x, y) -> x to y }.toSet() },
+            finish to { path -> path.windowedPairs().toSet() },
             { null })
 
     fun areConnected(start: Int, finish: Int): Boolean =

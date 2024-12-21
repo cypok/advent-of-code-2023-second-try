@@ -88,6 +88,21 @@ fun Long.toIntExact() = Math.toIntExact(this)
 inline fun <T, R> Pair<T, T>.map(transform: (T) -> R): Pair<R, R> =
     Pair(transform(first), transform(second))
 
+fun <T, S> Pair<T, S>.swap(): Pair<S, T> =
+    Pair(second, first)
+
+/** Like [single], but for two elements. */
+fun <T> List<T>.pair(): Pair<T, T> =
+    when (size) {
+        0, 1 -> throw NoSuchElementException("List has not enough elements.")
+        2 -> this[0] to this[1]
+        else -> throw IllegalArgumentException("List has more than one element.")
+    }
+
+/** Like [single], but for two elements. */
+fun <T> Iterable<T>.windowedPairs(): List<Pair<T, T>> =
+    windowed(2, step = 1, partialWindows = false).map { it.pair() }
+
 operator fun <T> List<T>.component6() = get(5)
 
 fun <T> List<T>.middle(): T = this[this.size/2]

@@ -37,7 +37,7 @@ fun main() = runAoc {
         val buyerSecrets = lines.map { it.toInt() }
 
         if (isPart1) {
-            buyerSecrets.sumOf { secretNumbers(it).last() }
+            buyerSecrets.sumOf { secretNumbers(it).last().toLong() }
 
         } else {
             data class DeltasSeq(val d1: Int, val d2: Int, val d3: Int, val d4: Int)

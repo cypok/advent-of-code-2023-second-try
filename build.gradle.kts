@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.1.0"
     id("application")
+    id("idea")
 }
 
 kotlin {
@@ -40,4 +41,10 @@ application {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+idea {
+  module {
+    excludeDirs.add(file("inputs"))
+  }
 }

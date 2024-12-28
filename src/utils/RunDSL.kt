@@ -4,9 +4,11 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.exists
 import kotlin.io.path.notExists
 import kotlin.io.path.readText
-import kotlin.io.path.writeBytes
+import kotlin.io.path.writeText
 import kotlin.streams.asSequence
 import kotlin.time.measureTimedValue
 
@@ -73,29 +75,16 @@ fun runAoc(content: AocContext.() -> Unit) {
 
     ctx.content()
 
-    val realInput = run {
-        // className = year2023.Day10
-        val className = findCallerFromMainFrame().className.substringBeforeLast("Kt")
-        // year = year2023
-        val year = className.substringBeforeLast(".Day")
-        // day = Day10
-        val day = "Day" + className.substringAfterLast("Day")
-        val inputsDir = "src/${year.replace('.', '/')}"
-        Path("$inputsDir/$day.txt")
-            .also { path ->
-                if (path.notExists()) {
-                    downloadRealInput(
-                        year.substringAfter("year").toInt(),
-                        day.substringAfter("Day").toInt(),
-                        path
-                    )
-                        .also { previewRealInput(it) }
-                }
-            }
-    }
+    val (realInput, realAnswers) = getRealInputAndAnswers()
 
     for ((partNum, solution) in ctx.solutions.entries.sortedBy { it.key }) {
-        fun runOne(runDesc: String, input: String, answer: Any? = null, param: Any? = null, timed: Boolean = false) {
+        fun runOne(
+            runDesc: String,
+            input: String,
+            answerProvider: () -> Any?,
+            param: Any? = null,
+            timed: Boolean = false,
+        ) {
             val solutionCtx = object : SolutionContext {
                 override val lines = input.trimEnd('\n').lines()
                 override val map by lazy { StringArray2D(lines) }
@@ -108,12 +97,16 @@ fun runAoc(content: AocContext.() -> Unit) {
             print("part$partNum, $runDesc: ")
             val (result, time) = measureTimedValue { runCatching { solutionCtx.solution() } }
             print(result.getOrNull()?.let {
-                if (answer == null || answer.toString() == it.toString()) {
-                    "$it"
+                val answer = answerProvider()
+                val suffix = if (answer == null) {
+                    "⭕ (unchecked)"
+                } else if (answer.toString() == it.toString()) {
+                    "🟢"
                 } else {
-                    "$it (WRONG ANSWER, expected $answer)"
+                    "🔴 (expected $answer)"
                 }
-            } ?: "EXCEPTION")
+                "$it $suffix"
+            } ?: "🔴 EXCEPTION")
             if (timed && result.isSuccess) {
                 var totalTime = time
                 print(" (took ${time.inWholeMilliseconds}")
@@ -136,13 +129,16 @@ fun runAoc(content: AocContext.() -> Unit) {
         }
 
         for (example in ctx.examples) {
-            val (answer, param) = example.answers[partNum] ?: continue
             val desc = example.description ?: "at ${example.codeLocation}"
-            runOne("example $desc", example.input, answer, param)
+            val input = example.input
+            val (answer, param) = example.answers[partNum] ?: continue
+            runOne("example $desc", input, { answer }, param)
         }
 
         if (!ctx.ignoreRealInput) {
-            runOne("real", realInput.readText(), timed = true)
+            val input = realInput.readText()
+            val answer = { realAnswers(partNum) }
+            runOne("real", input, answer, timed = true)
         }
     }
 }
@@ -152,8 +148,62 @@ private fun <K, V> MutableMap<K, V>.putEnsuringNew(key: K, value: V) {
     check(oldValue == null)
 }
 
-private fun downloadRealInput(year: Int, day: Int, outputPath: Path): String {
-    val url = URI("https://adventofcode.com/$year/day/$day/input").toURL()
+private fun getRealInputAndAnswers(): Pair<Path, (Int) -> String?> {
+    val className = findCallerFromMainFrame().className.substringBeforeLast("Kt")
+    val classNameRegex = """year(\d+).Day(\d+)""".toRegex()
+
+    val (year, day) = classNameRegex.matchEntire(className)!!
+        .groupValues.drop(1).map { it.toInt() }
+
+    val day2Digits = "%02d".format(day)
+
+    val baseName = "inputs/year$year/Day$day2Digits"
+    val realInput = Path("$baseName-input.txt")
+        .also { path ->
+            if (path.notExists()) {
+                val content = downloadRealInput(year, day, path)
+                path.createParentDirectories()
+                path.writeText(content)
+                if (false) { // Doesn't seem so useful.
+                    previewRealInput(content)
+                }
+            }
+        }
+
+    val answerPaths = listOf(1, 2).associateWith { partNum ->
+        Path("$baseName-answer$partNum.txt")
+    }
+    val cachedAnswers = answerPaths.mapValues { (_, path) ->
+        if (path.exists()) path.readText() else null
+    }
+
+    // Download them only when it's necessary.
+    val availableWebAnswers = lazy { downloadAnswers(year, day) }
+    fun answerProvider(partNum: Int): String? =
+        cachedAnswers[partNum]
+            ?: availableWebAnswers.value.getOrNull(partNum - 1)
+                ?.also { answer ->
+                    val p = answerPaths[partNum]!!
+                    p.createParentDirectories()
+                    p.writeText(answer)
+                }
+
+    return realInput to ::answerProvider
+}
+
+private fun downloadRealInput(year: Int, day: Int, outputPath: Path): String =
+    webGet(year, day, "/input")
+
+private fun downloadAnswers(year: Int, day: Int): List<String> =
+    webGet(year, day, "").let { content ->
+        """Your puzzle answer was <code>([^<]+)</code>""".toRegex()
+            .findAll(content)
+            .map { it.groupValues[1] }
+            .toList()
+    }
+
+private fun webGet(year: Int, day: Int, subUrl: String): String {
+    val url = URI("https://adventofcode.com/$year/day/$day$subUrl").toURL()
     try {
         val connection = url.openConnection() as HttpURLConnection
         val sessionCookie = Path(".session-cookie").readText().trim()
@@ -163,14 +213,12 @@ private fun downloadRealInput(year: Int, day: Int, outputPath: Path): String {
         when (connection.responseCode) {
             HttpURLConnection.HTTP_OK ->
                 connection.inputStream.use { input ->
-                    val bytes = input.readAllBytes()
-                    outputPath.writeBytes(bytes)
-                    return String(bytes)
+                    return String(input.readAllBytes())
                 }
             else -> throw RuntimeException("Bad response: ${connection.responseCode}, ${connection.responseMessage}")
         }
     } catch (e: Exception) {
-        throw RuntimeException("Cannot download $url", e)
+        throw RuntimeException("Cannot access $url", e)
     }
 }
 

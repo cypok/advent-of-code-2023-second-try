@@ -59,6 +59,19 @@ fun <T> Collection<Iterable<T>>.cartesianProduct(): List<List<T>> {
     return first().flatMap { head -> tails.map { tail -> listOf(head) + tail } }
 }
 
+fun <T> Collection<T>.permutations(): Set<List<T>> {
+    if (isEmpty()) return setOf(emptyList())
+
+    val res = mutableSetOf<List<T>>()
+    val thisSet = toSet()
+    for (e in this) {
+        for (smallerPerm in (thisSet - e).permutations()) {
+            res.add(smallerPerm + e)
+        }
+    }
+    return res
+}
+
 fun <T> Collection<T>.cycle(): Sequence<T> =
     generateSequence { this }.flatten()
 

@@ -7,12 +7,11 @@ import utils.*
 
 fun main() = runAoc {
     solution {
-        val program = lines.single().numbersAsInts()
         fun run(noun: Int, verb: Int): Int {
-            val pc = IntCodeComputer(program)
+            val pc = IntCodeComputer(intCode)
             pc[1] = noun
             pc[2] = verb
-            pc.interpret()
+            pc.run()
             return pc[0]
         }
 

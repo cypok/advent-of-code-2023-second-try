@@ -7,7 +7,7 @@ import utils.*
 
 fun main() = runAoc {
     solution {
-        fun run(noun: Int, verb: Int): Int {
+        fun run(noun: Long, verb: Long): Long {
             val pc = IntCodeComputer(intCode)
             pc[1] = noun
             pc[2] = verb
@@ -19,9 +19,9 @@ fun main() = runAoc {
             run(12, 2)
 
         } else {
-            for (noun in 0..99) {
-                for (verb in 0..99) {
-                    if (run(noun, verb) == 19690720) {
+            for (noun in 0..99L) {
+                for (verb in 0..99L) {
+                    if (run(noun, verb) == 19690720L) {
                         return@solution 100 * noun + verb
                     }
                 }

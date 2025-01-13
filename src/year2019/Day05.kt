@@ -10,7 +10,7 @@ fun main() = runAoc {
         val pc = IntCodeComputer(intCode)
         if (isPart1) {
             val result = pc.run(1)
-            check(result.dropLast(1).all { it == 0 })
+            check(result.dropLast(1).all { it == 0L })
             result.last()
         } else {
             pc.run(5).single()

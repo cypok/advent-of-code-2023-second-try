@@ -41,7 +41,7 @@ fun main() = runAoc {
                 printExtra(run {
                     val canvas = Array(height) { Array(width) { ' ' } }
                     robots.forEach { canvas[it.py][it.px] = '*' }
-                    canvas.joinToString("\n") { it.joinToString("") }
+                    canvas.toAsciiArt()
                 })
                 return@solution i
             }

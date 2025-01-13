@@ -1,10 +1,17 @@
 package year2019
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import year2019.IntCodeComputer.State.*
+import java.io.Serial
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 class IntCodeComputer(program: List<Long>) {
-    enum class State {
+    private enum class State {
         NOT_STARTED,
         RUNNING,
         WAITING_IO,
@@ -12,8 +19,7 @@ class IntCodeComputer(program: List<Long>) {
     }
 
     @Volatile
-    var state = NOT_STARTED
-        private set
+    private var state = NOT_STARTED
 
     private class Mem(initial: List<Long>) {
         private val fixed = initial.toMutableList()
@@ -51,17 +57,14 @@ class IntCodeComputer(program: List<Long>) {
         state = to
     }
 
-    private inline fun <R> withState(from: State, to: State, action: () -> R): R {
-        changeState(from, to)
+    private inline fun <R> io(action: () -> R): R {
+        changeState(RUNNING, WAITING_IO)
         try {
             return action()
         } finally {
-            changeState(to, from)
+            changeState(WAITING_IO, RUNNING)
         }
     }
-
-    private inline fun <R> io(action: () -> R) =
-        withState(RUNNING, WAITING_IO) { action() }
 
     suspend fun run(input: suspend () -> Long, output: suspend (Long) -> Unit) {
         changeState(NOT_STARTED, RUNNING)
@@ -137,6 +140,9 @@ class IntCodeComputer(program: List<Long>) {
         changeState(RUNNING, FINISHED)
     }
 
+    suspend fun run(input: ReceiveChannel<Long>, output: SendChannel<Long>) =
+        run(input::receive, output::send)
+
     fun run(input: List<Long>): List<Long> =
         runBlocking() {
             buildList {
@@ -147,4 +153,24 @@ class IntCodeComputer(program: List<Long>) {
     fun run(vararg input: Long): List<Long> =
         run(input.asList())
 
+}
+
+private object HaltedException : CancellationException() {
+    @Serial private fun readResolve(): Any = HaltedException
+}
+
+fun <E> ReceiveChannel<E>.halt() {
+    cancel(HaltedException)
+}
+
+@OptIn(ExperimentalContracts::class)
+suspend inline fun <E> SendChannel<E>.sendOrOnHalted(element: E, onHalted: () -> Unit) {
+    contract {
+        callsInPlace(onHalted, InvocationKind.AT_MOST_ONCE)
+    }
+    try {
+        send(element)
+    } catch (_: HaltedException) {
+        onHalted()
+    }
 }

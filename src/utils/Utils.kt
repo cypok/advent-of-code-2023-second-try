@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package utils
 
 import java.math.BigInteger
@@ -143,3 +145,5 @@ inline fun <T> List<T>.countLastWhile(predicate: (T) -> Boolean): Int {
 }
 
 fun shouldNotReachHere(): Nothing = error("should not reach here")
+
+const val FULL_BLOCK = '█'

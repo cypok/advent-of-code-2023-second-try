@@ -148,6 +148,30 @@ operator fun <T> Array<Array<T>>.get(pos: Point): T = this[pos.i][pos.j]
 operator fun <T> Array<Array<T>>.set(pos: Point, v: T) { this[pos.i][pos.j] = v }
 fun <T> Array<Array<T>>.getOrNull(pos: Point): T? = this.getOrNull(pos.i)?.getOrNull(pos.j)
 
+fun Array<Array<Char>>.toAsciiArt(): String {
+    // Background heuristic.
+    val bg = this[0].groupingBy { it }.eachCount().maxBy { it.value }.key
+
+    val linesWithSpaces = this
+        .map {
+            check(bg == ' ' || ' ' !in it)
+            it.joinToString("").replace(bg, ' ').trimEnd()
+        }
+        .dropWhile { it.isEmpty() }
+        .dropLastWhile { it.isEmpty() }
+        .joinToString("\n")
+        .trimIndent()
+        .lines()
+
+    val width = linesWithSpaces.maxOf { it.length }
+    val rectangularLines = linesWithSpaces.map { it.padEnd(width) }
+
+    return rectangularLines.joinToString("\n") {
+        assert(bg == ' ' || bg !in it)
+        it.replace(' ', bg)
+    }
+}
+
 val <T> Array<Array<T>>.valuesIndexed: Sequence<Pair<T, Point>>
     get() = sequence {
         for (i in 0 until this@valuesIndexed.size) {

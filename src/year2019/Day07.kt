@@ -3,9 +3,7 @@ package year2019
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
 import utils.*
-import year2019.IntCodeComputer.State.*
 
 // Task description:
 //   https://adventofcode.com/2019/day/7
@@ -60,28 +58,17 @@ fun main() = runAoc {
                 for ((pc, chPair) in pcs zip chs.zipWithNext()) {
                     val (chIn, chOut) = chPair
                     launch {
-                        pc.run(chIn::receive, chOut::send)
+                        pc.run(chIn, chOut)
+                        chIn.halt()
                     }
                 }
                 for ((ch, phase) in chs zip phases) {
                     ch.send(phase.toLong())
                 }
 
-                suspend fun stillRunning(): Boolean {
-                    val pc = pcs.first()
-                    while (pc.state == RUNNING) {
-                        yield() // let them block or finish
-                    }
-                    return when (pc.state) {
-                        WAITING_IO -> true
-                        FINISHED -> false
-                        else -> error(pc.state)
-                    }
-                }
-
                 var signal = 0L
-                while (stillRunning()) {
-                    chs.first().send(signal)
+                while (true) {
+                    chs.first().sendOrOnHalted(signal) { break }
                     signal = chs.last().receive()
                 }
                 signal

@@ -4,12 +4,7 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.exists
-import kotlin.io.path.notExists
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 import kotlin.streams.asSequence
 import kotlin.time.measureTimedValue
 
@@ -38,6 +33,8 @@ interface SolutionContext {
 
     val exampleParam: Any?
 
+    fun visualAnswer(answer: String): Any
+
     fun printExtra(arg: Any)
 }
 
@@ -47,6 +44,8 @@ private data class Example(val description: String?,
                            val codeLocation: String,
                            val input: String,
                            val answers: Map<Int, Pair<String, Any?>>)
+
+private data class VisualAnswerWrapper(val value: String)
 
 // TODO: somehow rework these dirty hacks for running all days
 var IS_BATCH_RUN = false
@@ -104,6 +103,8 @@ fun runAoc(content: AocContext.() -> Unit) {
 
                 override val exampleParam = param
 
+                override fun visualAnswer(answer: String) = VisualAnswerWrapper(answer)
+
                 override fun printExtra(arg: Any) { /* nop */ }
             }
             class VerboseCtx : SilentCtx() {
@@ -119,39 +120,65 @@ fun runAoc(content: AocContext.() -> Unit) {
                 return
             }
 
-            val actual = result.getOrNull()!!.toString()
-            print("$actual ")
             val expected = answerProvider()
-            print(if (expected == null) {
-                "⭕ (unchecked)"
-            } else if (expected == actual) {
-                "🟢"
+            val actualRaw = result.getOrNull()!!
+            if (actualRaw is VisualAnswerWrapper) {
+                println()
+                println(actualRaw.value)
+                print("⭕ (")
+                if (expected == null) {
+                    print("unchecked")
+                } else {
+                    print("expected $expected")
+                }
+                print(")")
             } else {
-                TOTAL_FAILS++
-                "🔴 (expected $expected)"
-            })
+                val actual = actualRaw.toString()
+                print("$actual ")
+                print(
+                    if (expected == null) {
+                        "⭕ (unchecked)"
+                    } else if (expected == actual) {
+                        "🟢"
+                    } else {
+                        TOTAL_FAILS++
+                        "🔴 (expected $expected)"
+                    }
+                )
+            }
             if (expected == null) {
                 // Try to submit the answer for the real input.
                 // Note that an example always has a non-null expected answer.
                 println()
                 println("Submit? [yes/no]")
                 if (readln() == "yes") {
+                    val actual =
+                        if (actualRaw is VisualAnswerWrapper) {
+                            println("What is the answer in the picture above?")
+                            readln()
+                        } else {
+                            actualRaw.toString()
+                        }
                     submitRealAnswer(year, day, partNum, actual)
                 }
             }
             if (timed) {
+                val maxTimeSec = 10
+                val maxExtraMeasurements = 10
                 var totalTime = time
                 print(" (took ${time.inWholeMilliseconds}")
-                if (!IS_BATCH_RUN && time.inWholeSeconds <= 5) {
-                    for (i in 0 until 10) {
-                        if (totalTime.inWholeSeconds > 10) {
-                            break
+                if (!IS_BATCH_RUN && time.inWholeSeconds <= maxTimeSec/2) {
+                    run measurements@ {
+                        repeat(maxExtraMeasurements) {
+                            if (totalTime.inWholeSeconds > maxTimeSec) {
+                                return@measurements
+                            }
+                            val (newResult, newTime) = measureTimedValue { runCatching { SilentCtx().solution() } }
+                            assert(newResult == result)
+                            print(", ${newTime.inWholeMilliseconds}")
+                            System.out.flush()
+                            totalTime += newTime
                         }
-                        val (newResult, newTime) = measureTimedValue { runCatching { SilentCtx().solution() } }
-                        assert(newResult == result)
-                        print(", ${newTime.inWholeMilliseconds}")
-                        System.out.flush()
-                        totalTime += newTime
                     }
                 }
                 print(" ms)")
